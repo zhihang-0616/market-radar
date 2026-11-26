@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0A0E15">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>市場雷達</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A0E15; --panel:#111722; --panel2:#161E2C; --line:#1F2A3B; --line2:#2A374C;
+  --text:#E6EAF0; --muted:#8A96A8; --dim:#5C6779;
+  --accent:#38BDF8; --accent2:#7DD3FC; --amber:#F5B942;
+  --up:#FF4D5E; --up-bg:rgba(255,77,94,.12); --down:#1FC77E; --down-bg:rgba(31,199,126,.12);
+  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  --sans:'Noto Sans TC',-apple-system,'PingFang TC','Microsoft JhengHei',sans-serif;
+  --r:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;-webkit-font-smoothing:antialiased}
+body{min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input,select{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line2);border-radius:8px;padding:9px 11px;width:100%;outline:none}
+input:focus,select:focus{border-color:var(--accent)}
+a{color:var(--accent2);text-decoration:none}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--muted)}
+
+/* Header */
+header{position:sticky;top:0;z-index:20;background:rgba(10,14,21,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top));display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:16px;letter-spacing:.5px}
+.radar{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--accent);position:relative;overflow:hidden;flex:none}
+.radar::before{content:'';position:absolute;inset:0;background:conic-gradient(from 0deg,rgba(56,189,248,.55),transparent 28%);animation:spin 3s linear infinite}
+.radar::after{content:'';position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px;border-radius:50%;background:var(--accent)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.clock{font-family:var(--mono);font-size:13px;color:var(--muted);display:flex;gap:10px}
+.clock b{color:var(--text);font-weight:700}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{font-size:12px;padding:3px 9px;border-radius:99px;border:1px solid var(--line2);color:var(--muted);display:flex;align-items:center;gap:5px;white-space:nowrap}
+.pill i{width:6px;height:6px;border-radius:50%;background:var(--dim)}
+.pill.on{color:var(--text);border-color:rgba(56,189,248,.4)} .pill.on i{background:var(--accent);box-shadow:0 0 8px var(--accent);animation:blink 1.6s infinite}
+.pill.pre i{background:var(--amber)}
+@keyframes blink{50%{opacity:.35}}
+.hbtns{margin-left:auto;display:flex;gap:6px;align-items:center}
+.ibtn{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;border:1px solid var(--line2);color:var(--muted);font-size:15px}
+.ibtn:hover{color:var(--text);border-color:var(--accent)}
+.ibtn.on{color:var(--accent);border-color:rgba(56,189,248,.5)}
+.sync{font-size:11px;color:var(--dim);font-family:var(--mono)}
+.sync.err{color:var(--up)}
+
+/* Layout */
+main{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) minmax(0,.85fr);gap:14px;padding:14px 16px 24px;max-width:1800px;margin:0 auto}
+.col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.ph{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.ph h2{font-size:14px;font-weight:700;letter-spacing:.5px}
+.ph .sub{font-size:12px;color:var(--muted)}
+.ph .tools{margin-left:auto;display:flex;gap:6px}
+.tbtn{font-size:12px;padding:4px 10px;border-radius:7px;border:1px solid var(--line2);color:var(--muted)}
+.tbtn:hover,.tbtn.on{color:var(--accent);border-color:var(--accent)}
+
+/* Fear & greed */
+.fng{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fg{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;gap:12px;align-items:center}
+.gauge{width:86px;flex:none}
+.fg .t{font-size:12px;color:var(--muted)}
+.fg .v{font-size:15px;font-weight:700;margin:2px 0}
+.fg .b{display:inline-block;font-size:11px;padding:1px 7px;border-radius:5px;margin-bottom:4px}
+.fg .tip{font-size:12px;color:var(--muted);line-height:1.5}
+.fg .cmp{font-size:11px;color:var(--dim);margin-top:3px}
+
+/* Quote cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.q{position:relative;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 11px 8px;min-width:0;transition:border-color .2s}
+.q:hover{border-color:var(--line2)}
+.q.fut{border-color:rgba(56,189,248,.25)}
+.q-top{display:flex;align-items:baseline;gap:6px;min-width:0}
+.q-name{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.q-sym{font-size:11px;color:var(--dim);font-family:var(--mono);white-space:nowrap}
+.q-tag{font-size:10px;padding:0 5px;border-radius:4px;background:rgba(56,189,248,.14);color:var(--accent2);margin-left:auto;white-space:nowrap}
+.q-price{font-family:var(--mono);font-size:19px;font-weight:700;margin-top:5px;letter-spacing:-.3px;border-radius:4px;padding:0 2px;margin-left:-2px;display:inline-block}
+.q-chg{font-family:var(--mono);font-size:12px;margin-top:1px}
+.q svg{display:block;width:100%;height:26px;margin-top:5px}
+.q-act{position:absolute;top:6px;right:6px;display:none;gap:3px}
+.q.editing .q-act{display:flex}
+.q.editing .q-tag{display:none}
+.q-act button{width:22px;height:22px;border-radius:6px;background:var(--panel);border:1px solid var(--line2);font-size:11px;color:var(--muted)}
+.q-act button:hover{color:var(--text);border-color:var(--accent)}
+.q-bell{position:absolute;bottom:7px;right:8px;font-size:11px;color:var(--amber);opacity:.9}
+.flash-up{animation:fu 1s}.flash-down{animation:fd 1s}
+@keyframes fu{0%{background:var(--up-bg)}100%{background:transparent}}
+@keyframes fd{0%{background:var(--down-bg)}100%{background:transparent}}
+.add{border:1px dashed var(--line2);border-radius:10px;display:grid;place-items:center;color:var(--dim);min-height:86px;font-size:13px}
+.add:hover{color:var(--accent);border-color:var(--accent)}
+.sec-note{font-size:11px;color:var(--dim);margin-top:8px}
+
+/* News */
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.chip{font-size:12px;padding:4px 10px;border-radius:99px;border:1px solid var(--line2);color:var(--muted)}
+.chip.on{background:rgba(56,189,248,.14);border-color:rgba(56,189,248,.5);color:var(--accent2)}
+.filters select{width:auto;padding:3px 8px;font-size:12px;border-radius:99px}
+.nlist{display:flex;flex-direction:column;gap:8px}
+.n{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--line2);border-radius:9px;padding:10px 12px}
+.n.bull{border-left-color:var(--up)} .n.bear{border-left-color:var(--down)}
+.n.fresh{box-shadow:0 0 0 1px rgba(56,189,248,.45) inset}
+.n-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:11px;color:var(--dim)}
+.tag{font-size:11px;padding:1px 7px;border-radius:5px;font-weight:700}
+.tag.bull{background:var(--up-bg);color:var(--up)} .tag.bear{background:var(--down-bg);color:var(--down)} .tag.neu{background:rgba(138,150,168,.14);color:var(--muted)}
+.mk{font-size:11px;padding:0 6px;border-radius:4px;border:1px solid var(--line2);color:var(--muted)}
+.stars{color:var(--amber);letter-spacing:-1px;font-size:11px}
+.new{font-size:10px;font-weight:700;color:var(--bg);background:var(--accent);padding:0 5px;border-radius:4px}
+.n h3{font-size:14.5px;font-weight:700;line-height:1.5;margin-top:5px}
+.n p{font-size:13px;color:#B9C2CF;line-height:1.6;margin-top:3px}
+.n .why{color:var(--muted);font-size:12.5px}
+.n .orig{font-size:11.5px;color:var(--dim);margin-top:4px;display:flex;gap:8px;align-items:baseline}
+.n .orig span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.empty{color:var(--dim);font-size:13px;text-align:center;padding:24px 0;line-height:1.8}
+.more{width:100%;padding:8px;border:1px solid var(--line2);border-radius:8px;color:var(--muted);font-size:12px;margin-top:8px}
+
+/* Calendar */
+.cday{font-size:12px;font-weight:700;color:var(--accent2);margin:12px 0 6px;display:flex;gap:6px;align-items:center}
+.cday:first-child{margin-top:0}
+.cday span{color:var(--dim);font-weight:400}
+.ev{display:grid;grid-template-columns:44px 1fr;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
+.ev.past{opacity:.45}
+.ev .tm{font-family:var(--mono);font-size:12px;color:var(--muted);padding-top:1px}
+.ev .tt{font-size:13px;font-weight:500;line-height:1.45;display:flex;gap:6px;align-items:flex-start}
+.ev .imp{width:7px;height:7px;border-radius:50%;flex:none;margin-top:6px;background:var(--dim)}
+.ev .imp.High{background:var(--amber);box-shadow:0 0 6px rgba(245,185,66,.6)}
+.ev .ct{font-size:10.5px;padding:0 5px;border-radius:4px;border:1px solid var(--line2);color:var(--muted);flex:none;margin-top:1px}
+.ev .ct.earn{border-color:rgba(56,189,248,.4);color:var(--accent2)}
+.ev .fc{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:2px}
+.ev .fc b{color:var(--text);font-weight:500}
+.ev .wy{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.5}
+.soon{font-size:10px;color:var(--bg);background:var(--amber);padding:0 5px;border-radius:4px;font-weight:700;flex:none;margin-top:2px}
+
+/* Alerts */
+.al{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line);font-size:13px}
+.al:first-child{border-top:0}
+.al .d{flex:1;min-width:0}
+.al .d b{font-weight:700}
+.al .d small{display:block;color:var(--dim);font-size:11px}
+.al.off{opacity:.45}
+.al .st{font-size:10px;padding:0 6px;border-radius:4px;background:rgba(245,185,66,.15);color:var(--amber)}
+.sw{width:34px;height:20px;border-radius:99px;background:var(--line2);position:relative;flex:none}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--muted);transition:.2s}
+.sw.on{background:rgba(56,189,248,.45)} .sw.on::after{left:16px;background:var(--accent)}
+.evl{font-size:12px;color:var(--muted);padding:6px 0;border-top:1px solid var(--line);line-height:1.5}
+.evl time{font-family:var(--mono);color:var(--amber);margin-right:6px}
+
+/* Modal */
+.mask{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:none;align-items:center;justify-content:center;padding:16px}
+.mask.show{display:flex}
+.modal{background:var(--panel);border:1px solid var(--line2);border-radius:14px;width:100%;max-width:420px;padding:18px;max-height:90vh;overflow:auto}
+.modal h3{font-size:16px;margin-bottom:14px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+.field .hint{font-size:11.5px;color:var(--dim);margin-top:5px;line-height:1.6}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mbtns{display:flex;gap:8px;margin-top:16px}
+.btn{flex:1;padding:10px;border-radius:9px;border:1px solid var(--line2);font-weight:500}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#04141F;font-weight:700}
+.btn:disabled{opacity:.5}
+.err{color:var(--up);font-size:12px;margin-top:8px;min-height:1em}
+.setlist .btn{width:100%;margin-top:8px;text-align:left;padding:10px 12px}
+
+/* Toast */
+#toasts{position:fixed;right:16px;top:72px;z-index:60;display:flex;flex-direction:column;gap:8px;width:min(360px,calc(100vw - 32px))}
+.toast{background:var(--panel2);border:1px solid var(--line2);border-left:3px solid var(--accent);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.5;box-shadow:0 10px 30px rgba(0,0,0,.4);animation:tin .25s}
+.toast.alert{border-left-color:var(--amber)} .toast.bull{border-left-color:var(--up)} .toast.bear{border-left-color:var(--down)}
+.toast b{display:block;font-size:12px;color:var(--muted);margin-bottom:2px}
+@keyframes tin{from{transform:translateY(-8px);opacity:0}}
+
+/* Setup */
+.setup{max-width:460px;margin:8vh auto;padding:0 16px}
+.setup .panel{padding:22px}
+.setup h1{font-size:20px;margin:14px 0 6px}
+.setup p{color:var(--muted);font-size:13px;line-height:1.7;margin-bottom:16px}
+
+/* Tab bar (mobile) */
+.tabbar{display:none}
+@media (max-width:1180px){
+  main{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)}
+  #colCal{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+}
+@media (max-width:760px){
+  html,body{font-size:14px}
+  header{padding:8px 12px;padding-top:calc(8px + env(safe-area-inset-top));gap:8px}
+  .clock .et,.sync{display:none}
+  .pills{order:3;width:100%;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
+  main{display:block;padding:10px 10px calc(76px + env(safe-area-inset-bottom))}
+  .col{display:none}
+  .col.active{display:flex}
+  #colCal.active{display:flex}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fng{grid-template-columns:1fr}
+  .gauge{width:74px}
+  .q-price{font-size:17px}
+  .q.fut .q-sym{display:none}
+  .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(17,23,34,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+  .tabbar button{flex:1;padding:9px 0 8px;font-size:11px;color:var(--dim);display:flex;flex-direction:column;align-items:center;gap:2px;position:relative}
+  .tabbar button span{font-size:18px;line-height:1}
+  .tabbar button.on{color:var(--accent)}
+  .tabbar .badge{position:absolute;top:5px;left:calc(50% + 8px);min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:var(--up);color:#fff;font-size:10px;line-height:16px;font-weight:700;display:none}
+  #toasts{top:auto;bottom:calc(72px + env(safe-area-inset-bottom));right:10px}
+}
+</style>
+</head>
+<body>
+
+<div id="setupView" style="display:none">
+  <div class="setup">
+    <div class="panel">
+      <div class="brand"><div class="radar"></div>市場雷達</div>
+      <h1>連線到你的資料後台</h1>
+      <p>請貼上 Google Apps Script 部署後的「網頁應用程式網址」和試算表「設定」分頁裡的 ACCESS_KEY。這些只會存在這台裝置的瀏覽器裡。</p>
+      <div class="field"><label>網頁應用程式網址</label><input id="setUrl" placeholder="https://script.google.com/macros/s/.../exec"></div>
+      <div class="field"><label>連線密碼（ACCESS_KEY）</label><input id="setKey" placeholder="例如 a1b2c3d4"></div>
+      <div class="err" id="setErr"></div>
+      <div class="mbtns"><button class="btn pri" id="setGo">連線</button></div>
+      <div class="mbtns"><button class="btn" id="setDemo">先看範例畫面</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="appView" style="display:none">
+<header>
+  <div class="brand"><div class="radar"></div>市場雷達</div>
+  <div class="clock"><span>台北 <b id="clkTw">--:--:--</b></span><span class="et">美東 <span id="clkUs">--:--</span></span></div>
+  <div class="pills" id="pills"></div>
+  <div class="hbtns">
+    <span class="sync" id="sync">連線中…</span>
+    <button class="ibtn" id="btnSound" title="音效">🔔</button>
+    <button class="ibtn" id="btnSet" title="設定">⚙</button>
+  </div>
+</header>
+
+<main>
+  <div class="col active" id="colMk" data-tab="mk">
+    <div class="panel">
+      <div class="ph"><h2>恐懼貪婪指數</h2><span class="sub">市場情緒溫度計</span></div>
+      <div class="fng" id="fng"></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h2>台股・台指期</h2><span class="sub" id="twSub"></span><div class="tools"><button class="tbtn" data-edit="TW">編輯</button></div></div>
+      <div class="grid" id="gTW"></div>
+      <div class="sec-note">台指期資料來自期交所，免費資料可能延遲數分鐘。</div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h2>美股</h2><span class="sub" id="usSub"></span><div class="tools"><button class="tbtn" data-edit="US">編輯</button></div></div>
+      <div class="grid" id="gUS"></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h2>加密貨幣</h2><span class="sub" id="cxSub">24 小時漲跌</span><div class="tools"><button class="tbtn" data-edit="CRYPTO">編輯</button></div></div>
+      <div class="grid" id="gCRYPTO"></div>
+    </div>
+  </div>
+
+  <div class="col" id="colNews" data-tab="news">
+    <div class="panel">
+      <div class="ph"><h2>即時新聞</h2><span class="sub" id="newsSub"></span></div>
+      <div class="filters" id="nFilters"></div>
+      <div class="nlist" id="nList"></div>
+    </div>
+  </div>
+
+  <div class="col" id="colCal" data-tab="cal">
+    <div class="panel" id="pCal">
+      <div class="ph"><h2>7 天行事曆</h2><span class="sub">台北時間</span><div class="tools"><button class="tbtn" id="calHigh">只看重要</button></div></div>
+      <div id="calList"></div>
+    </div>
+    <div class="panel" id="pAlert">
+      <div class="ph"><h2>價格警報</h2><span class="sub">觸發時推播 Discord</span><div class="tools"><button class="tbtn" id="alAdd">＋ 新增</button></div></div>
+      <div id="alList"></div>
+      <div id="evList" style="margin-top:10px"></div>
+    </div>
+  </div>
+</main>
+
+<nav class="tabbar" id="tabbar">
+  <button data-go="mk" class="on"><span>📈</span>行情</button>
+  <button data-go="news"><span>📰</span>新聞<i class="badge" id="newsBadge"></i></button>
+  <button data-go="cal"><span>📅</span>行事曆・警報</button>
+</nav>
+</div>
+
+<!-- 新增標的 -->
+<div class="mask" id="mAdd"><div class="modal">
+  <h3>新增關注標的</h3>
+  <div class="field"><label>市場</label>
+    <select id="addMk"><option value="TW">台股</option><option value="US">美股／指數／商品</option><option value="CRYPTO">加密貨幣</option></select></div>
+  <div class="field"><label>代號</label><input id="addSym" autocomplete="off">
+    <div class="hint" id="addHint"></div></div>
+  <div class="field"><label>顯示名稱（可空白，自動帶入）</label><input id="addName" autocomplete="off"></div>
+  <div class="err" id="addErr"></div>
+  <div class="mbtns"><button class="btn" data-close>取消</button><button class="btn pri" id="addGo">新增</button></div>
+</div></div>
+
+<!-- 新增警報 -->
+<div class="mask" id="mAlert"><div class="modal">
+  <h3>新增價格警報</h3>
+  <div class="field"><label>標的</label><select id="alSym"></select><div class="hint" id="alNow"></div></div>
+  <div class="row2">
+    <div class="field"><label>條件</label><select id="alCond">
+      <option>價格高於</option><option>價格低於</option><option>漲幅超過%</option><option>跌幅超過%</option></select></div>
+    <div class="field"><label>數值</label><input id="alVal" type="number" step="any" inputmode="decimal"></div>
+  </div>
+  <div class="field"><label>備註（可空白）</label><input id="alNote" placeholder="例如：到這價位考慮停利"></div>
+  <div class="field"><div class="hint">漲跌幅：台股、美股以「昨收」計算；加密貨幣以「24 小時」計算。觸發一次後，要等條件解除再成立才會再通知。</div></div>
+  <div class="err" id="alErr"></div>
+  <div class="mbtns"><button class="btn" data-close>取消</button><button class="btn pri" id="alGo">新增</button></div>
+</div></div>
+
+<!-- 設定 -->
+<div class="mask" id="mSet"><div class="modal setlist">
+  <h3>設定</h3>
+  <div class="field"><label>狀態</label><div class="hint" id="setInfo"></div></div>
+  <button class="btn" id="sNotify">🔔 開啟瀏覽器通知（網頁在背景時也會跳通知）</button>
+  <button class="btn" id="sTestSound">🔊 測試音效</button>
+  <button class="btn" id="sTestDc">💬 傳送 Discord 測試訊息</button>
+  <button class="btn" id="sDaily">☀️ 立即推播一次每日總結</button>
+  <button class="btn" id="sLogout">🔌 中斷連線／更換後台</button>
+  <div class="err" id="sErr"></div>
+  <div class="mbtns"><button class="btn" data-close>關閉</button></div>
+</div></div>
+
+<div id="toasts"></div>
+
+<script>
+'use strict';
+/* ---------- 儲存 ---------- */
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem('mr_' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('mr_' + k, JSON.stringify(v)); } catch (e) {} },
+  del(k) { try { localStorage.removeItem('mr_' + k); } catch (e) {} },
+};
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+const DEMO = new URLSearchParams(location.search).has('demo') || LS.get('demo', false);
+const S = {
+  url: LS.get('url', ''), key: LS.get('key', ''),
+  watch: [], fut: { list: [], session: '' }, tw: {}, us: {}, crypto: {}, spark: {},
+  fng: null, news: [], cal: [], alerts: [], events: [], cfg: { showLevel: 2, pushLevel: 4 },
+  newsVer: 0, since: Date.now(), seen: new Set(LS.get('seen', [])), freshIds: new Set(),
+  f: Object.assign({ mk: 'all', imp: 'all', lv: null }, LS.get('filters', {})),
+  sound: LS.get('sound', true), editing: {}, calHigh: LS.get('calHigh', false),
+  ws: null, wsOk: false, wsTry: 0, newsLimit: 40, unread: 0, tab: 'mk', firstLoad: true,
+};
+
+/* ---------- API ---------- */
+async function api(action, params) {
+  if (DEMO) return demoApi(action, params || {});
+  const u = new URL(S.url);
+  u.searchParams.set('action', action);
+  u.searchParams.set('key', S.key);
+  Object.entries(params || {}).forEach(([k, v]) => u.searchParams.set(k, v));
+  const r = await fetch(u.toString(), { cache: 'no-store' });
+  const j = await r.json();
+  if (!j.ok) throw new Error(j.error || '發生錯誤');
+  return j;
+}
+
+/* ---------- 格式 ---------- */
+function fmt(n, d) {
+  if (n === null || n === undefined || !isFinite(n)) return '—';
+  const a = Math.abs(n);
+  if (d === undefined) d = a >= 1 ? 2 : a >= 0.01 ? 4 : 6;
+  return Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+}
+const cls = v => v > 0 ? 'up' : v < 0 ? 'down' : 'flat';
+const arrow = v => v > 0 ? '▲' : v < 0 ? '▼' : '';
+function tz(d, zone, opt) { return new Intl.DateTimeFormat('zh-TW', Object.assign({ timeZone: zone, hour12: false }, opt)).format(d); }
+function partsIn(zone, d) {
+  const p = {}; new Intl.DateTimeFormat('en-US', { timeZone: zone, hour12: false, weekday: 'short', hour: '2-digit', minute: '2-digit' }).formatToParts(d || new Date()).forEach(x => p[x.type] = x.value);
+  const wd = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }[p.weekday];
+  return { wd, hm: (Number(p.hour) % 24) * 100 + Number(p.minute) };
+}
+const WK = '日一二三四五六';
+function hhmm(ts) { return tz(new Date(ts), 'Asia/Taipei', { hour: '2-digit', minute: '2-digit' }); }
+function ago(ts) {
+  const m = Math.round((Date.now() - ts) / 60000);
+  if (m < 1) return '剛剛'; if (m < 60) return m + ' 分鐘前';
+  const h = Math.floor(m / 60); if (h < 24) return h + ' 小時前';
+  return Math.floor(h / 24) + ' 天前';
+}
+
+/* ---------- 市場狀態 ---------- */
+function status() {
+  const tw = partsIn('Asia/Taipei'), ny = partsIn('America/New_York');
+  const twOpen = tw.wd >= 1 && tw.wd <= 5 && tw.hm >= 900 && tw.hm < 1330;
+  const futDay = tw.wd >= 1 && tw.wd <= 5 && tw.hm >= 845 && tw.hm < 1345;
+  const futNight = (tw.wd >= 1 && tw.wd <= 5 && tw.hm >= 1500) || (tw.wd >= 2 && tw.wd <= 6 && tw.hm < 500);
+  let us = '休市';
+  if (ny.wd >= 1 && ny.wd <= 5) {
+    if (ny.hm >= 930 && ny.hm < 1600) us = '盤中';
+    else if (ny.hm >= 400 && ny.hm < 930) us = '盤前';
+    else if (ny.hm >= 1600 && ny.hm < 2000) us = '盤後';
+  }
+  if (us === '盤中') {
+    const ts = Object.values(S.us).filter(Boolean).map(q => q.time || 0);
+    if (ts.length && Math.max(...ts) < Date.now() - 40 * 60000) us = '假日休市';
+  }
+  return { twOpen, futDay, futNight, us };
+}
+function renderPills() {
+  const st = status();
+  const p = [
+    ['台股', st.twOpen ? '盤中' : '收盤', st.twOpen ? 'on' : ''],
+    ['台指期', st.futDay ? '日盤' : st.futNight ? '夜盤' : '休市', st.futDay || st.futNight ? 'on' : ''],
+    ['美股', st.us, st.us === '盤中' ? 'on' : (st.us === '盤前' || st.us === '盤後') ? 'pre' : ''],
+    ['加密', '24H', 'on'],
+  ];
+  $('#pills').innerHTML = p.map(x => `<span class="pill ${x[2]}"><i></i>${x[0]} ${x[1]}</span>`).join('');
+  $('#usSub').textContent = st.us === '盤中' ? '盤中即時' : '最近收盤價';
+  $('#twSub').textContent = (S.fut.session ? '期貨' + S.fut.session : '') + (st.twOpen ? '・現貨盤中' : '・現貨收盤');
+}
+function tickClock() {
+  const d = new Date();
+  $('#clkTw').textContent = tz(d, 'Asia/Taipei', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  $('#clkUs').textContent = tz(d, 'America/New_York', { hour: '2-digit', minute: '2-digit' });
+}
+
+/* ---------- 走勢小圖 ---------- */
+function spark(arr, prev, c) {
+  if (!arr || arr.length < 2) return '<svg viewBox="0 0 100 26"></svg>';
+  let min = Math.min(...arr), max = Math.max(...arr);
+  if (prev) { min = Math.min(min, prev); max = Math.max(max, prev); }
+  const rng = max - min || 1;
+  const y = v => (24 - (v - min) / rng * 22).toFixed(1);
+  const pts = arr.map((v, i) => (i / (arr.length - 1) * 100).toFixed(1) + ',' + y(v)).join(' ');
+  const col = c === 'up' ? 'var(--up)' : c === 'down' ? 'var(--down)' : 'var(--muted)';
+  const base = prev ? `<line x1="0" x2="100" y1="${y(prev)}" y2="${y(prev)}" stroke="var(--line2)" stroke-dasharray="2 2" stroke-width="1" vector-effect="non-scaling-stroke"/>` : '';
+  return `<svg viewBox="0 0 100 26" preserveAspectRatio="none">${base}<polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>`;
+}
+
+/* ---------- 行情卡片 ---------- */
+function qData(m, sym) { return m === 'TW' ? S.tw[sym] : m === 'US' ? S.us[sym] : S.crypto[sym]; }
+function decFor(m, sym, q) {
+  if (m === 'CRYPTO') return undefined;
+  if (m === 'TW' && q && q.price >= 1000 && sym !== 't00') return 0;
+  return 2;
+}
+function hasAlert(m, sym) { return S.alerts.some(a => a.enabled && a.market === m && String(a.symbol).toUpperCase() === String(sym).toUpperCase()); }
+function cardHtml(m, w) {
+  const q = qData(m, w.symbol) || {};
+  const c = cls(q.chg);
+  const d = decFor(m, w.symbol, q);
+  const sp = m === 'CRYPTO' ? (S.spark[w.symbol] || q.spark) : q.spark;
+  const symShow = w.symbol === 't00' ? 'TAIEX' : w.symbol;
+  return `<div class="q ${S.editing[m] ? 'editing' : ''}" id="${cid(m, w.symbol)}">
+    <div class="q-top"><span class="q-name">${esc(m === 'CRYPTO' ? w.symbol : w.name)}</span><span class="q-sym">${esc(m === 'CRYPTO' ? (w.name !== w.symbol ? w.name : 'USDT') : symShow)}</span></div>
+    <div class="q-price num ${c}" data-p>${fmt(q.price, d)}</div>
+    <div class="q-chg ${c}" data-c>${q.price == null ? '<span class="flat">資料讀取中</span>' : `${arrow(q.chg)} ${fmt(Math.abs(q.chg || 0), d)}　${q.pct != null ? (q.pct > 0 ? '+' : '') + q.pct.toFixed(2) + '%' : ''}`}</div>
+    <div data-s>${spark(sp, m === 'CRYPTO' ? null : q.prev, c)}</div>
+    ${hasAlert(m, w.symbol) ? '<span class="q-bell">🔔</span>' : ''}
+    <div class="q-act">
+      <button data-mv="up" data-m="${m}" data-s="${esc(w.symbol)}" title="往前">↑</button>
+      <button data-mv="down" data-m="${m}" data-s="${esc(w.symbol)}" title="往後">↓</button>
+      <button data-al data-m="${m}" data-s="${esc(w.symbol)}" title="設定警報">🔔</button>
+      <button data-del data-m="${m}" data-s="${esc(w.symbol)}" title="移除">✕</button>
+    </div>
+  </div>`;
+}
+function cid(m, s) { return 'q-' + m + '-' + String(s).replace(/[^a-zA-Z0-9]/g, '_'); }
+function futHtml(f) {
+  const c = cls(f.chg);
+  return `<div class="q fut">
+    <div class="q-top"><span class="q-name">${esc(f.name)}</span><span class="q-sym">${esc(f.contract || f.symbol)}</span><span class="q-tag">${esc(f.session)}</span></div>
+    <div class="q-price num ${c}">${fmt(f.price, 0)}</div>
+    <div class="q-chg ${c}">${arrow(f.chg)} ${fmt(Math.abs(f.chg || 0), 0)}　${f.pct != null ? (f.pct > 0 ? '+' : '') + Number(f.pct).toFixed(2) + '%' : ''}</div>
+    <div class="sec-note" style="margin-top:6px">高 ${fmt(f.high, 0)}・低 ${fmt(f.low, 0)}${f.timeStr ? '・' + f.timeStr : ''}</div>
+  </div>`;
+}
+function renderMarkets() {
+  ['TW', 'US', 'CRYPTO'].forEach(m => {
+    const list = S.watch.filter(w => w.market === m);
+    let h = '';
+    if (m === 'TW') h += S.fut.list.map(futHtml).join('');
+    h += list.map(w => cardHtml(m, w)).join('');
+    h += `<button class="add" data-add="${m}">＋ 新增${m === 'TW' ? '台股' : m === 'US' ? '美股' : '幣種'}</button>`;
+    $('#g' + m).innerHTML = h;
+  });
+  $$('[data-edit]').forEach(b => b.classList.toggle('on', !!S.editing[b.dataset.edit]));
+}
+const lastPx = {};
+function updateCard(m, sym) {
+  const el = document.getElementById(cid(m, sym));
+  if (!el) return;
+  const q = qData(m, sym) || {};
+  const c = cls(q.chg), d = decFor(m, sym, q);
+  const p = el.querySelector('[data-p]');
+  const k = m + sym, prev = lastPx[k];
+  p.textContent = fmt(q.price, d);
+  p.className = 'q-price num ' + c;
+  if (prev != null && q.price != null && q.price !== prev) {
+    p.classList.remove('flash-up', 'flash-down'); void p.offsetWidth;
+    p.classList.add(q.price > prev ? 'flash-up' : 'flash-down');
+  }
+  lastPx[k] = q.price;
+  const ce = el.querySelector('[data-c]');
+  ce.className = 'q-chg ' + c;
+  ce.innerHTML = `${arrow(q.chg)} ${fmt(Math.abs(q.chg || 0), d)}　${q.pct != null ? (q.pct > 0 ? '+' : '') + q.pct.toFixed(2) + '%' : ''}`;
+}
+
+/* ---------- 恐懼貪婪 ---------- */
+function gauge(v) {
+  const a = Math.PI * (1 - v / 100);
+  const x = 50 + 38 * Math.cos(a), y = 50 - 38 * Math.sin(a);
+  const segs = [['#1FC77E', 0, 25], ['#7BD88F', 25, 45], ['#8A96A8', 45, 55], ['#F59E8B', 55, 75], ['#FF4D5E', 75, 100]];
+  const arc = (s, e) => { const a1 = Math.PI * (1 - s / 100), a2 = Math.PI * (1 - e / 100); return `M${50 + 38 * Math.cos(a1)} ${50 - 38 * Math.sin(a1)} A38 38 0 0 1 ${50 + 38 * Math.cos(a2)} ${50 - 38 * Math.sin(a2)}`; };
+  return `<svg class="gauge" viewBox="0 0 100 60">${segs.map(s => `<path d="${arc(s[1] + .8, s[2] - .8)}" stroke="${s[0]}" stroke-width="8" fill="none" opacity=".85"/>`).join('')}
+    <line x1="50" y1="50" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#E6EAF0" stroke-width="2.5" stroke-linecap="round"/><circle cx="50" cy="50" r="4" fill="#E6EAF0"/>
+    <text x="50" y="44" text-anchor="middle" font-family="JetBrains Mono" font-weight="700" font-size="15" fill="#E6EAF0" dy="-8"></text></svg>`;
+}
+function renderFng() {
+  const box = $('#fng');
+  if (!S.fng) { box.innerHTML = '<div class="empty">讀取中…</div>'; return; }
+  const one = (title, f) => {
+    if (!f) return `<div class="fg"><div><div class="t">${title}</div><div class="tip">暫時取不到資料</div></div></div>`;
+    const bc = f.value <= 44 ? 'down' : f.value >= 56 ? 'up' : 'flat';
+    const bg = bc === 'up' ? 'var(--up-bg)' : bc === 'down' ? 'var(--down-bg)' : 'rgba(138,150,168,.14)';
+    const diff = f.prev != null ? f.value - f.prev : null;
+    return `<div class="fg">${gauge(f.value)}<div style="min-width:0">
+      <div class="t">${title}</div>
+      <div class="v"><span class="num">${f.value}</span> ${esc(f.label)}</div>
+      <span class="b ${bc}" style="background:${bg}">${esc(f.bias)}</span>
+      <div class="tip">${esc(f.tip)}</div>
+      <div class="cmp">${diff != null ? `昨天 ${f.prev}（${diff > 0 ? '+' : ''}${diff}）` : ''}${f.week != null ? `・一週前 ${f.week}` : ''}</div>
+    </div></div>`;
+  };
+  box.innerHTML = one('美股（台股可參考）', S.fng.stock) + one('加密貨幣', S.fng.crypto);
+}
+
+/* ---------- 新聞 ---------- */
+function renderNewsFilters() {
+  const mk = [['all', '全部'], ['台股', '台股'], ['美股', '美股'], ['加密', '加密']];
+  const imp = [['all', '不分多空'], ['利多', '只看利多'], ['利空', '只看利空']];
+  const lv = S.f.lv || S.cfg.showLevel || 2;
+  $('#nFilters').innerHTML =
+    mk.map(x => `<button class="chip ${S.f.mk === x[0] ? 'on' : ''}" data-fmk="${x[0]}">${x[1]}</button>`).join('') +
+    imp.map(x => `<button class="chip ${S.f.imp === x[0] ? 'on' : ''}" data-fimp="${x[0]}">${x[1]}</button>`).join('') +
+    `<select id="fLv">${[1, 2, 3, 4, 5].map(n => `<option value="${n}" ${n === lv ? 'selected' : ''}>重要度 ≥ ${'★'.repeat(n)}</option>`).join('')}</select>`;
+}
+function filteredNews() {
+  const lv = S.f.lv || S.cfg.showLevel || 2;
+  return S.news.filter(n => n.importance >= lv && (S.f.mk === 'all' || (n.markets || []).includes(S.f.mk)) && (S.f.imp === 'all' || n.impact === S.f.imp));
+}
+function renderNews() {
+  renderNewsFilters();
+  const list = filteredNews();
+  $('#newsSub').textContent = S.news.length ? `更新 ${ago(Math.max(...S.news.map(n => n.ts)))}・約每 ${S.cfg.newsEvery || 5} 分鐘抓一次` : '';
+  if (!list.length) { $('#nList').innerHTML = `<div class="empty">${S.news.length ? '這個篩選條件下沒有新聞' : '還沒有新聞。<br>後台每幾分鐘會自動抓一次，請稍候。'}</div>`; return; }
+  const tagc = { '利多': 'bull', '利空': 'bear', '中性': 'neu' };
+  $('#nList').innerHTML = list.slice(0, S.newsLimit).map(n => {
+    const c = tagc[n.impact] || 'neu';
+    const showOrig = n.orig && n.orig !== n.title;
+    return `<article class="n ${c === 'neu' ? '' : c} ${S.freshIds.has(n.id) ? 'fresh' : ''}">
+      <div class="n-meta">${S.freshIds.has(n.id) ? '<span class="new">NEW</span>' : ''}<span class="tag ${c}">${esc(n.impact)}</span>
+        <span class="stars">${'★'.repeat(n.importance)}</span>
+        ${(n.markets || []).map(m => `<span class="mk">${esc(m)}</span>`).join('')}
+        <span style="margin-left:auto" title="${esc(new Date(n.ts).toLocaleString('zh-TW'))}">${hhmm(n.ts)}・${esc(n.source)}</span></div>
+      <h3>${esc(n.title)}</h3>
+      ${n.summary ? `<p>${esc(n.summary)}</p>` : ''}
+      ${n.reason ? `<p class="why">💡 ${esc(n.reason)}</p>` : ''}
+      <div class="orig">${showOrig ? `<span title="${esc(n.orig)}">原文：${esc(n.orig)}</span>` : '<span></span>'}${n.link ? `<a href="${esc(n.link)}" target="_blank" rel="noopener">閱讀全文 ↗</a>` : ''}</div>
+    </article>`;
+  }).join('') + (list.length > S.newsLimit ? `<button class="more" id="nMore">顯示更多（還有 ${list.length - S.newsLimit} 則）</button>` : '');
+}
+function ingestNews(news, notify) {
+  const pushLv = S.cfg.pushLevel || 4;
+  const firstVisit = LS.get('seen', null) === null;
+  const fresh = firstVisit ? [] : news.filter(n => !S.seen.has(n.id));
+  news.forEach(n => S.seen.add(n.id));
+  LS.set('seen', Array.from(S.seen).slice(-600));
+  S.news = news;
+  fresh.forEach(n => S.freshIds.add(n.id));
+  if (notify && fresh.length) {
+    const big = fresh.filter(n => n.importance >= pushLv).sort((a, b) => b.importance - a.importance);
+    const showLv = S.f.lv || S.cfg.showLevel || 2;
+    const visible = fresh.filter(n => n.importance >= showLv).length;
+    if (big.length) {
+      beep(big[0].importance >= 5 ? 'big' : 'news');
+      big.slice(0, 3).forEach(n => toast(`${'★'.repeat(n.importance)} ${n.impact}`, n.title, n.impact === '利多' ? 'bull' : n.impact === '利空' ? 'bear' : ''));
+      sysNotify('📰 ' + big[0].impact + '｜' + big[0].title, big[0].summary || '');
+    }
+    if (S.tab !== 'news' && visible) { S.unread += visible; renderBadge(); }
+  }
+  renderNews();
+}
+function renderBadge() { const b = $('#newsBadge'); if (!b) return; b.textContent = S.unread > 99 ? '99+' : S.unread; b.style.display = S.unread ? 'block' : 'none'; }
+
+/* ---------- 行事曆 ---------- */
+function renderCal() {
+  const now = Date.now();
+  let ev = S.cal.filter(e => e.ts >= now - 6 * 3600000);
+  if (S.calHigh) ev = ev.filter(e => e.impact === 'High' || e.impact === 'Holiday');
+  $('#calHigh').classList.toggle('on', S.calHigh);
+  if (!ev.length) { $('#calList').innerHTML = '<div class="empty">目前沒有資料</div>'; return; }
+  let h = '', lastDay = '';
+  const todayKey = tz(new Date(), 'Asia/Taipei', { month: '2-digit', day: '2-digit' });
+  ev.forEach(e => {
+    const d = new Date(e.ts);
+    const key = tz(d, 'Asia/Taipei', { month: '2-digit', day: '2-digit' });
+    if (key !== lastDay) {
+      lastDay = key;
+      const wd = WK[partsIn('Asia/Taipei', d).wd];
+      h += `<div class="cday">${key}（${wd}）${key === todayKey ? '<span>今天</span>' : ''}</div>`;
+    }
+    const past = e.ts < now - 30 * 60000;
+    const soon = !past && e.ts - now < 3 * 3600000 && e.ts > now - 30 * 60000 && e.impact === 'High';
+    const allDay = e.impact === 'Holiday';
+    const fc = [e.actual ? `公布 <b>${esc(e.actual)}</b>` : '', e.forecast ? (e.type === 'earn' ? esc(e.forecast) : `預期 <b>${esc(e.forecast)}</b>`) : '', e.previous ? `前值 ${esc(e.previous)}` : ''].filter(Boolean).join('・');
+    h += `<div class="ev ${past ? 'past' : ''}">
+      <div class="tm">${allDay ? '全天' : e.type === 'earn' ? (e.zh.includes('盤前') ? '盤前' : e.zh.includes('盤後') ? '盤後' : '—') : hhmm(e.ts)}</div>
+      <div><div class="tt"><i class="imp ${e.impact}"></i><span class="ct ${e.type === 'earn' ? 'earn' : ''}">${esc(e.countryZh)}</span><span style="flex:1">${esc(e.zh || e.title)}</span>${soon ? '<span class="soon">即將</span>' : ''}</div>
+      ${fc ? `<div class="fc">${fc}</div>` : ''}
+      ${e.why ? `<div class="wy">${esc(e.why)}</div>` : ''}</div>
+    </div>`;
+  });
+  $('#calList').innerHTML = h + '<div class="sec-note">● 黃點＝高影響事件。財報時間為美東盤前／盤後。</div>';
+}
+
+/* ---------- 警報 ---------- */
+function renderAlerts() {
+  const unit = c => c.includes('%') ? '%' : '';
+  $('#alList').innerHTML = S.alerts.length ? S.alerts.map(a => {
+    const q = qData(a.market, a.symbol);
+    return `<div class="al ${a.enabled ? '' : 'off'}">
+      <button class="sw ${a.enabled ? 'on' : ''}" data-alt="${esc(a.id)}" title="啟用/暫停"></button>
+      <div class="d"><b>${esc(a.name)}</b> ${esc(a.cond.replace('%', ''))} <span class="num">${a.value}${unit(a.cond)}</span> ${a.state === '觸發中' ? '<span class="st">已觸發</span>' : ''}
+        <small>${q ? '現價 ' + fmt(q.price, decFor(a.market, a.symbol, q)) + '・' : ''}${esc(a.note || '')}</small></div>
+      <button class="ibtn" style="width:28px;height:28px;font-size:12px" data-ald="${esc(a.id)}" title="刪除">✕</button>
+    </div>`;
+  }).join('') : '<div class="empty">還沒有警報。<br>按「＋ 新增」，或在行情卡片按「編輯 → 🔔」設定。</div>';
+  $('#evList').innerHTML = S.events.length ? '<div class="sub" style="font-size:12px;color:var(--muted);margin-bottom:4px">最近 24 小時觸發紀錄</div>' +
+    S.events.slice(0, 8).map(e => `<div class="evl"><time>${hhmm(e.ts)}</time>${esc(e.text)}</div>`).join('') : '';
+}
+
+/* ---------- 音效 / 通知 ---------- */
+let actx = null;
+function unlockAudio() {
+  try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); } catch (e) {}
+}
+function beep(kind, force) {
+  if (!S.sound && !force) return;
+  unlockAudio(); if (!actx) return;
+  const seq = kind === 'alert' ? [[880, 0], [1175, .17], [880, .34], [1175, .51]] : kind === 'big' ? [[660, 0], [880, .13], [1320, .26]] : [[784, 0], [1047, .14]];
+  seq.forEach(([f, t]) => {
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = 'sine'; o.frequency.value = f;
+    const st = actx.currentTime + t;
+    g.gain.setValueAtTime(0.0001, st);
+    g.gain.exponentialRampToValueAtTime(0.3, st + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, st + 0.15);
+    o.connect(g); g.connect(actx.destination); o.start(st); o.stop(st + 0.17);
+  });
+}
+function sysNotify(title, body) {
+  try { if (document.hidden && 'Notification' in window && Notification.permission === 'granted') new Notification(title, { body: body }); } catch (e) {}
+}
+function toast(head, text, kind) {
+  const t = document.createElement('div');
+  t.className = 'toast ' + (kind || '');
+  t.innerHTML = `<b>${esc(head)}</b>${esc(text)}`;
+  t.onclick = () => t.remove();
+  $('#toasts').prepend(t);
+  setTimeout(() => t.remove(), 9000);
+  while ($('#toasts').children.length > 4) $('#toasts').lastChild.remove();
+}
+function renderSoundBtn() { const b = $('#btnSound'); b.classList.toggle('on', S.sound); b.textContent = S.sound ? '🔔' : '🔕'; b.title = S.sound ? '音效開啟中（點一下關閉）' : '音效已關閉'; }
+
+/* ---------- 加密即時（幣安 WebSocket）---------- */
+const WS_HOSTS = ['wss://data-stream.binance.vision/stream?streams=', 'wss://stream.binance.com:9443/stream?streams='];
+function connectWs() {
+  if (DEMO) return;
+  if (S.ws) { try { S.ws.onclose = null; S.ws.close(); } catch (e) {} S.ws = null; }
+  const syms = S.watch.filter(w => w.market === 'CRYPTO').map(w => w.symbol.toLowerCase() + 'usdt@miniTicker');
+  if (!syms.length) return;
+  const host = WS_HOSTS[S.wsTry % WS_HOSTS.length];
+  let ws;
+  try { ws = new WebSocket(host + syms.join('/')); } catch (e) { S.wsOk = false; return; }
+  S.ws = ws;
+  let got = false;
+  ws.onmessage = ev => {
+    try {
+      const d = JSON.parse(ev.data).data;
+      if (!d || !d.s) return;
+      got = true; S.wsOk = true;
+      const b = d.s.replace(/USDT$/, '');
+      const c = +d.c, o = +d.o;
+      S.crypto[b] = Object.assign(S.crypto[b] || {}, { price: c, prev: o, chg: c - o, pct: o ? (c - o) / o * 100 : null, high: +d.h, low: +d.l, time: d.E });
+      queueCrypto(b);
+    } catch (e) {}
+  };
+  ws.onclose = () => { S.wsOk = false; if (!got) S.wsTry++; setTimeout(connectWs, got ? 3000 : 8000); };
+  ws.onerror = () => { try { ws.close(); } catch (e) {} };
+}
+const cq = new Set(); let cqT = null;
+function queueCrypto(b) { cq.add(b); if (!cqT) cqT = setTimeout(() => { cq.forEach(x => updateCard('CRYPTO', x)); cq.clear(); cqT = null; }, 500); }
+async function loadCryptoSpark() {
+  if (DEMO) return;
+  const list = S.watch.filter(w => w.market === 'CRYPTO');
+  await Promise.all(list.map(async w => {
+    try {
+      const r = await fetch('https://data-api.binance.vision/api/v3/klines?symbol=' + w.symbol + 'USDT&interval=1h&limit=24');
+      const k = await r.json();
+      if (Array.isArray(k)) S.spark[w.symbol] = k.map(x => +x[4]);
+    } catch (e) {}
+  }));
+  list.forEach(w => { const el = document.getElementById(cid('CRYPTO', w.symbol)); if (el) { const q = S.crypto[w.symbol] || {}; el.querySelector('[data-s]').innerHTML = spark(S.spark[w.symbol], null, cls(q.chg)); } });
+}
+
+/* ---------- 資料更新 ---------- */
+function setSync(ok, text) { const s = $('#sync'); s.textContent = text; s.classList.toggle('err', !ok); }
+function applyQuotes(j) {
+  if (j.futures) S.fut = j.futures;
+  if (j.tw) S.tw = j.tw;
+  if (j.us) S.us = j.us;
+  if (j.crypto) Object.entries(j.crypto).forEach(([k, v]) => { if (v && (!S.wsOk || !S.crypto[k])) S.crypto[k] = Object.assign(S.crypto[k] || {}, v); });
+}
+function handleEvents(evs) {
+  if (!evs || !evs.length) return;
+  const fresh = evs.filter(e => e.ts >= S.since);
+  if (!fresh.length) return;
+  S.since = Math.max(...fresh.map(e => e.ts)) + 1;
+  fresh.forEach(e => S.events.unshift(e));
+  S.events = S.events.slice(0, 30);
+  beep('alert');
+  fresh.slice(0, 3).forEach(e => toast('🚨 價格警報', e.text, 'alert'));
+  sysNotify('🚨 價格警報', fresh[0].text);
+  refreshAlerts();
+  renderAlerts();
+}
+async function refreshAlerts() { try { const j = await api('alerts'); S.alerts = j.alerts || S.alerts; renderAlerts(); renderMarkets(); } catch (e) {} }
+
+async function loadAll() {
+  const j = await api('all', { since: Date.now() - 86400000 });
+  S.watch = j.watch || [];
+  applyQuotes(j);
+  S.fng = j.fng; S.cal = j.calendar || []; S.alerts = j.alerts || []; S.cfg = Object.assign(S.cfg, j.cfg || {});
+  S.events = (j.events || []).slice(0, 30);
+  S.since = j.time || Date.now();
+  S.newsVer = j.newsVer;
+  renderMarkets(); renderFng(); renderCal(); renderAlerts(); renderPills();
+  ingestNews(j.news || [], false);
+  S.firstLoad = false;
+  setSync(true, '已更新 ' + hhmm(Date.now()));
+  connectWs(); loadCryptoSpark();
+}
+
+let polling = false, fails = 0;
+async function poll() {
+  if (polling) return; polling = true;
+  try {
+    const parts = ['fut', 'tw', 'us'];
+    if (!S.wsOk) parts.push('crypto');
+    const j = await api('quotes', { parts: parts.join(','), since: S.since });
+    applyQuotes(j);
+    renderMarkets(); renderPills(); renderAlerts();
+    handleEvents(j.events);
+    if (j.newsVer && j.newsVer !== S.newsVer) {
+      S.newsVer = j.newsVer;
+      const n = await api('news');
+      ingestNews(n.news || [], true);
+    }
+    fails = 0;
+    setSync(true, '已更新 ' + tz(new Date(), 'Asia/Taipei', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+  } catch (e) {
+    fails++;
+    setSync(false, '連線失敗，重試中');
+    if (fails === 3) toast('連線問題', String(e.message || e), 'alert');
+  } finally { polling = false; }
+}
+async function slowRefresh(kind) {
+  try {
+    if (kind === 'fng') { const j = await api('fng'); S.fng = j.fng; renderFng(); }
+    if (kind === 'cal') { const j = await api('cal'); S.cal = j.calendar || []; renderCal(); }
+  } catch (e) {}
+}
+
+/* ---------- 互動 ---------- */
+function openM(id) { $('#' + id).classList.add('show'); }
+function closeM() { $$('.mask').forEach(m => m.classList.remove('show')); }
+const HINT = {
+  TW: '輸入股票代號，例如 2330、2603、00878；加權指數輸入「加權」。',
+  US: '股票輸入代號，例如 NVDA、AAPL、TSLA。指數或商品可輸入：道瓊、標普、那斯達克、費半、VIX、美元指數、黃金、原油、美債。',
+  CRYPTO: '輸入幣種代號，例如 BTC、ETH、SOL、DOGE（以 USDT 報價）。',
+};
+function openAdd(m) {
+  $('#addMk').value = m || 'TW'; $('#addSym').value = ''; $('#addName').value = ''; $('#addErr').textContent = '';
+  $('#addHint').textContent = HINT[$('#addMk').value];
+  openM('mAdd'); setTimeout(() => $('#addSym').focus(), 50);
+}
+function openAlert(m, sym) {
+  const opts = S.watch.map(w => `<option value="${w.market}|${esc(w.symbol)}" ${w.market === m && w.symbol === sym ? 'selected' : ''}>${{ TW: '台股', US: '美股', CRYPTO: '加密' }[w.market]}・${esc(w.market === 'CRYPTO' ? w.symbol : w.name)}（${esc(w.symbol === 't00' ? 'TAIEX' : w.symbol)}）</option>`).join('');
+  $('#alSym').innerHTML = opts; $('#alVal').value = ''; $('#alNote').value = ''; $('#alErr').textContent = '';
+  showNow(); openM('mAlert');
+}
+function showNow() {
+  const [m, s] = ($('#alSym').value || '|').split('|');
+  const q = qData(m, s);
+  $('#alNow').textContent = q && q.price != null ? `現價 ${fmt(q.price, decFor(m, s, q))}（${q.pct != null ? (q.pct > 0 ? '+' : '') + q.pct.toFixed(2) + '%' : '—'}）` : '';
+}
+
+document.addEventListener('click', async e => {
+  unlockAudio();
+  const t = e.target.closest('button,[data-close]');
+  if (e.target.classList.contains('mask')) { closeM(); return; }
+  if (!t) return;
+  if (t.hasAttribute('data-close')) { closeM(); return; }
+  if (t.dataset.add) { openAdd(t.dataset.add); return; }
+  if (t.dataset.edit) { const m = t.dataset.edit; S.editing[m] = !S.editing[m]; renderMarkets(); return; }
+  if (t.dataset.go) {
+    S.tab = t.dataset.go;
+    $$('#tabbar button').forEach(b => b.classList.toggle('on', b === t));
+    $$('.col').forEach(c => c.classList.toggle('active', c.dataset.tab === S.tab));
+    if (S.tab === 'news') { S.unread = 0; renderBadge(); }
+    window.scrollTo(0, 0); return;
+  }
+  if (t.dataset.fmk) { S.f.mk = t.dataset.fmk; LS.set('filters', S.f); S.newsLimit = 40; renderNews(); return; }
+  if (t.dataset.fimp) { S.f.imp = t.dataset.fimp; LS.set('filters', S.f); S.newsLimit = 40; renderNews(); return; }
+  if (t.id === 'nMore') { S.newsLimit += 40; renderNews(); return; }
+  if (t.id === 'calHigh') { S.calHigh = !S.calHigh; LS.set('calHigh', S.calHigh); renderCal(); return; }
+  if (t.id === 'alAdd') { openAlert(); return; }
+  if (t.hasAttribute('data-al')) { openAlert(t.dataset.m, t.dataset.s); return; }
+  if (t.dataset.mv) {
+    try { const j = await api('watch_move', { market: t.dataset.m, symbol: t.dataset.s, dir: t.dataset.mv }); S.watch = j.watch; renderMarkets(); } catch (err) { toast('錯誤', err.message, 'alert'); }
+    return;
+  }
+  if (t.hasAttribute('data-del')) {
+    const m = t.dataset.m, s = t.dataset.s;
+    if (!confirm('確定移除 ' + s + '？')) return;
+    try { const j = await api('watch_del', { market: m, symbol: s }); S.watch = j.watch; renderMarkets(); if (m === 'CRYPTO') connectWs(); } catch (err) { toast('錯誤', err.message, 'alert'); }
+    return;
+  }
+  if (t.dataset.alt) { try { const j = await api('alert_toggle', { id: t.dataset.alt }); S.alerts = j.alerts; renderAlerts(); renderMarkets(); } catch (err) { toast('錯誤', err.message, 'alert'); } return; }
+  if (t.dataset.ald) {
+    if (!confirm('確定刪除這個警報？')) return;
+    try { const j = await api('alert_del', { id: t.dataset.ald }); S.alerts = j.alerts; renderAlerts(); renderMarkets(); } catch (err) { toast('錯誤', err.message, 'alert'); }
+    return;
+  }
+  if (t.id === 'btnSound') { S.sound = !S.sound; LS.set('sound', S.sound); renderSoundBtn(); if (S.sound) beep('news'); return; }
+  if (t.id === 'btnSet') {
+    $('#setInfo').innerHTML = DEMO ? '目前是範例模式（假資料）' :
+      `AI 判讀：${S.cfg.gemini ? '✅ 已啟用 Gemini' : '⚠️ 未設定（使用 Google 翻譯＋關鍵字）'}<br>Discord 推播：${S.cfg.discord ? '✅ 已設定' : '⚠️ 未設定'}<br>推播門檻：重要度 ≥ ${S.cfg.pushLevel}<br>瀏覽器通知：${'Notification' in window ? ({ granted: '✅ 已允許', denied: '❌ 已封鎖', default: '未設定' }[Notification.permission]) : '此瀏覽器不支援'}`;
+    $('#sErr').textContent = ''; openM('mSet'); return;
+  }
+  if (t.id === 'sNotify') {
+    if (!('Notification' in window)) { $('#sErr').textContent = '這個瀏覽器不支援通知（iPhone 需先「加入主畫面」）'; return; }
+    const p = await Notification.requestPermission();
+    $('#sErr').textContent = p === 'granted' ? '✅ 已開啟通知' : '沒有允許通知';
+    return;
+  }
+  if (t.id === 'sTestSound') { beep('big', true); setTimeout(() => beep('alert', true), 700); return; }
+  if (t.id === 'sTestDc') { try { await api('test_discord'); $('#sErr').textContent = '✅ 已送出，請到 Discord 查看'; } catch (err) { $('#sErr').textContent = err.message; } return; }
+  if (t.id === 'sDaily') { try { t.disabled = true; await api('daily_now'); $('#sErr').textContent = '✅ 已推播每日總結'; } catch (err) { $('#sErr').textContent = err.message; } finally { t.disabled = false; } return; }
+  if (t.id === 'sLogout') { if (confirm('確定中斷連線？')) { LS.del('url'); LS.del('key'); LS.del('demo'); location.href = location.pathname; } return; }
+  if (t.id === 'addGo') {
+    const m = $('#addMk').value, s = $('#addSym').value.trim();
+    if (!s) { $('#addErr').textContent = '請輸入代號'; return; }
+    t.disabled = true; $('#addErr').textContent = '查詢中…';
+    try {
+      const j = await api('watch_add', { market: m, symbol: s, name: $('#addName').value.trim() });
+      S.watch = j.watch; closeM(); toast('已新增', j.item.name + '（' + j.item.symbol + '）');
+      await poll(); if (m === 'CRYPTO') { connectWs(); loadCryptoSpark(); }
+    } catch (err) { $('#addErr').textContent = err.message; } finally { t.disabled = false; }
+    return;
+  }
+  if (t.id === 'alGo') {
+    const [m, s] = ($('#alSym').value || '|').split('|');
+    const v = $('#alVal').value;
+    if (!m || v === '') { $('#alErr').textContent = '請選擇標的並輸入數值'; return; }
+    t.disabled = true;
+    try { const j = await api('alert_add', { market: m, symbol: s, cond: $('#alCond').value, value: v, note: $('#alNote').value.trim() }); S.alerts = j.alerts; closeM(); renderAlerts(); renderMarkets(); toast('已新增警報', $('#alSym').selectedOptions[0].textContent + ' ' + $('#alCond').value.replace('%', '') + ' ' + v); }
+    catch (err) { $('#alErr').textContent = err.message; } finally { t.disabled = false; }
+    return;
+  }
+});
+document.addEventListener('change', e => {
+  if (e.target.id === 'fLv') { S.f.lv = Number(e.target.value); LS.set('filters', S.f); S.newsLimit = 40; renderNews(); }
+  if (e.target.id === 'addMk') $('#addHint').textContent = HINT[e.target.value];
+  if (e.target.id === 'alSym') showNow();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeM();
+  if (e.key === 'Enter' && $('#mAdd').classList.contains('show')) $('#addGo').click();
+});
+
+/* ---------- 啟動 ---------- */
+let timers = [];
+async function start() {
+  $('#setupView').style.display = 'none';
+  $('#appView').style.display = 'block';
+  renderSoundBtn(); tickClock(); renderPills();
+  $('#fng').innerHTML = '<div class="empty">讀取中…</div>';
+  try { await loadAll(); }
+  catch (e) {
+    setSync(false, '連線失敗');
+    if (!DEMO && /密碼/.test(e.message)) { LS.del('key'); showSetup('密碼錯誤，請重新輸入'); return; }
+    toast('連線失敗', e.message + '（會自動重試）', 'alert');
+    setTimeout(start, 15000); return;
+  }
+  timers.forEach(clearInterval);
+  timers = [
+    setInterval(tickClock, 1000),
+    setInterval(() => { if (!document.hidden || Date.now() % 60000 < 16000) poll(); }, 15000),
+    setInterval(() => slowRefresh('fng'), 30 * 60000),
+    setInterval(() => slowRefresh('cal'), 60 * 60000),
+    setInterval(() => { renderPills(); renderCal(); if (S.news.length) $('#newsSub').textContent = `更新 ${ago(Math.max(...S.news.map(n => n.ts)))}・約每 ${S.cfg.newsEvery || 5} 分鐘抓一次`; }, 60000),
+    setInterval(loadCryptoSpark, 10 * 60000),
+  ];
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(); });
+}
+function showSetup(err) {
+  $('#appView').style.display = 'none';
+  $('#setupView').style.display = 'block';
+  $('#setUrl').value = S.url; $('#setKey').value = S.key; $('#setErr').textContent = err || '';
+}
+$('#setGo').onclick = async () => {
+  const url = $('#setUrl').value.trim(), key = $('#setKey').value.trim();
+  if (!/^https:\/\/script\.google(usercontent)?\.com\//.test(url)) { $('#setErr').textContent = '網址看起來不對，應該是 https://script.google.com/macros/s/…/exec'; return; }
+  S.url = url; S.key = key;
+  $('#setErr').textContent = '連線測試中…';
+  try { await api('news'); LS.set('url', url); LS.set('key', key); LS.del('demo'); start(); }
+  catch (e) { $('#setErr').textContent = '連線失敗：' + e.message; }
+};
+$('#setDemo').onclick = () => { location.search = '?demo=1'; };
+
+/* ---------- 範例模式（假資料，用來預覽畫面）---------- */
+function demoApi(action, p) {
+  const now = Date.now();
+  const r = (b, v) => b * (1 + (Math.random() - .5) * v);
+  const mk = (base, prevPct, n) => { const prev = base / (1 + prevPct / 100); const arr = []; let x = prev; for (let i = 0; i < (n || 40); i++) { x = x + (base - x) * 0.08 + (Math.random() - .5) * base * 0.002; arr.push(x); } arr.push(base); const price = r(base, 0.0008); return { price, prev, chg: price - prev, pct: (price - prev) / prev * 100, time: now, spark: arr }; };
+  if (!window._demo) {
+    window._demo = {
+      watch: [
+        { market: 'TW', symbol: 't00', name: '加權指數' }, { market: 'TW', symbol: '2330', name: '台積電' }, { market: 'TW', symbol: '2317', name: '鴻海' }, { market: 'TW', symbol: '2454', name: '聯發科' }, { market: 'TW', symbol: '0050', name: '元大台灣50' },
+        { market: 'US', symbol: '^DJI', name: '道瓊' }, { market: 'US', symbol: '^GSPC', name: '標普500' }, { market: 'US', symbol: '^IXIC', name: '那斯達克' }, { market: 'US', symbol: '^SOX', name: '費城半導體' }, { market: 'US', symbol: 'TSM', name: '台積電ADR' }, { market: 'US', symbol: 'NVDA', name: '輝達' },
+        { market: 'CRYPTO', symbol: 'BTC', name: '比特幣' }, { market: 'CRYPTO', symbol: 'ETH', name: '以太幣' }, { market: 'CRYPTO', symbol: 'SOL', name: 'Solana' }, { market: 'CRYPTO', symbol: 'BNB', name: 'BNB' }, { market: 'CRYPTO', symbol: 'XRP', name: 'XRP' },
+      ],
+      base: { t00: [27450, .62], '2330': [1450, 1.05], '2317': [228, -0.87], '2454': [1385, 2.1], '0050': [205.3, .55], '^DJI': [47210, -.21], '^GSPC': [6820, .34], '^IXIC': [23110, .71], '^SOX': [7240, 1.42], 'TSM': [298.4, 1.8], 'NVDA': [181.2, 2.35], BTC: [91250, -1.6], ETH: [3020, -2.4], SOL: [138.5, 3.2], BNB: [880, .4], XRP: [2.13, -0.9] },
+      alerts: [{ id: 'd1', enabled: true, market: 'CRYPTO', symbol: 'BTC', name: '比特幣', cond: '價格低於', value: 88000, note: '跌破考慮加碼', state: '' }, { id: 'd2', enabled: true, market: 'TW', symbol: '2330', name: '台積電', cond: '跌幅超過%', value: 3, note: '', state: '' }],
+    };
+  }
+  const D = window._demo;
+  const q = m => { const o = {}; D.watch.filter(w => w.market === m).forEach(w => { const b = D.base[w.symbol] || [100, 1]; o[w.symbol] = mk(b[0], b[1]); }); return o; };
+  const fut = { session: '夜盤', list: [{ name: '台指期', contract: '臺指期 12', symbol: 'TXF', session: '夜盤', ...(() => { const x = mk(27520, .74); return { price: x.price, chg: x.chg, pct: x.pct, prev: x.prev }; })(), high: 27610, low: 27300, timeStr: '01:42:15' }, { name: '小台指', contract: '小型臺指 12', symbol: 'MXF', session: '夜盤', ...(() => { const x = mk(27518, .73); return { price: x.price, chg: x.chg, pct: x.pct, prev: x.prev }; })(), high: 27612, low: 27298, timeStr: '01:42:14' }] };
+  const H = 3600000;
+  const news = [
+    { id: 'n1', ts: now - 6 * 60000, source: 'CNBC', orig: 'Fed officials signal openness to December rate cut as inflation cools', title: '聯準會官員釋出訊號，通膨降溫下 12 月降息可能性升高', summary: '多位聯準會官員表示，近期通膨數據放緩，不排除在 12 月會議再度降息。', impact: '利多', markets: ['美股', '台股', '加密'], importance: 5, reason: '降息讓資金成本下降，有利股市與加密貨幣。', link: '#' },
+    { id: 'n2', ts: now - 22 * 60000, source: '鉅亨網', orig: '台積電 11 月營收創新高', title: '台積電 11 月營收創新高，AI 晶片需求強勁', summary: '受惠先進製程與 AI 伺服器訂單，台積電單月營收年增逾三成。', impact: '利多', markets: ['台股'], importance: 4, reason: '台積電占台股權重最大，營收亮眼有助撐盤。', link: '#' },
+    { id: 'n3', ts: now - 48 * 60000, source: 'CoinDesk', orig: 'Bitcoin ETFs see $420M outflows as traders de-risk ahead of holidays', title: '比特幣 ETF 單日淨流出 4.2 億美元，假期前交易員降低風險', summary: '美國現貨比特幣 ETF 連續三天資金淨流出，市場觀望氣氛濃厚。', impact: '利空', markets: ['加密'], importance: 4, reason: 'ETF 資金流出代表機構買盤減弱，短線壓力增加。', link: '#' },
+    { id: 'n4', ts: now - 1.6 * H, source: 'MarketWatch', orig: 'Oil prices slip as OPEC+ weighs output increase', title: 'OPEC+ 考慮增產，油價走低', summary: 'OPEC+ 下週開會討論是否提高產量，國際油價下跌約 1.5%。', impact: '中性', markets: ['美股'], importance: 3, reason: '油價下跌有助緩解通膨，但能源股承壓。', link: '#' },
+    { id: 'n5', ts: now - 3 * H, source: 'Google新聞', orig: '美國擬對部分進口電子產品加徵關稅', title: '美國擬對部分進口電子產品加徵關稅', summary: '美國商務部提出新一輪關稅清單，涵蓋部分消費性電子產品零組件。', impact: '利空', markets: ['台股', '美股'], importance: 4, reason: '台灣電子供應鏈可能受衝擊，成本與需求面都有壓力。', link: '#' },
+    { id: 'n6', ts: now - 5 * H, source: 'Yahoo Finance', orig: 'Analysts expect solid holiday spending despite cautious consumers', title: '分析師預期年終購物季消費仍穩健', summary: '儘管消費者信心偏弱，零售業者預估年終銷售仍將小幅成長。', impact: '中性', markets: ['美股'], importance: 2, reason: '消費穩定對經濟有支撐，但影響有限。', link: '#' },
+  ];
+  const day = 86400000;
+  const cal = [
+    { type: 'eco', ts: now + 2 * H, countryZh: '美國', impact: 'High', zh: '初領失業救濟金人數', forecast: '225K', previous: '220K', why: '每週公布的就業溫度計，人數暴增代表裁員增加。' },
+    { type: 'eco', ts: now + 2 * H, countryZh: '美國', impact: 'High', zh: '核心 PCE 物價月增率', forecast: '0.2%', previous: '0.3%', why: '聯準會官方最看重的通膨指標，高於預期不利降息。' },
+    { type: 'eco', ts: now + day + 3 * H, countryZh: '中國', impact: 'Medium', zh: '製造業 PMI', forecast: '49.6', previous: '49.2', why: '高於 50 擴張、低於 50 收縮。' },
+    { type: 'earn', ts: now + 2 * day, countryZh: '美股', impact: 'High', zh: '博通（AVGO）財報・盤後', forecast: 'EPS 預估 $1.86', why: '大型權值股財報，可能帶動整體美股與台股相關供應鏈。' },
+    { type: 'eco', ts: now + 3 * day, countryZh: '美國', impact: 'High', zh: 'ISM 製造業 PMI', forecast: '48.9', previous: '48.7', why: '高於 50 代表製造業擴張、低於 50 代表收縮。' },
+    { type: 'eco', ts: now + 5 * day, countryZh: '美國', impact: 'High', zh: '非農就業人數', forecast: '110K', previous: '119K', why: '美國就業最重要的數據。遠高於預期→經濟強、降息機會降低，股市常先跌；遠低於預期→擔心衰退。' },
+    { type: 'eco', ts: now + 5 * day, countryZh: '美國', impact: 'High', zh: '失業率', forecast: '4.4%', previous: '4.4%', why: '失業率上升代表經濟降溫，提高降息機率，但太高會引發衰退擔憂。' },
+  ];
+  const fng = { stock: Object.assign({ value: 38, prev: 33, week: 22, label: '恐懼', bias: '偏空', tip: '投資人偏保守，資金觀望。行情較弱，等待利多消息或止跌訊號。' }), crypto: { value: 21, prev: 25, week: 15, label: '極度恐懼', bias: '短線偏空', tip: '市場非常悲觀、恐慌賣壓大。短線容易續跌，但歷史上也常是逆向布局的時機，宜分批、控制部位。' } };
+  const base = { ok: true, time: now, newsVer: 1, events: [] };
+  return new Promise(res => setTimeout(() => {
+    if (action === 'all') res(Object.assign(base, { watch: D.watch, futures: fut, tw: q('TW'), us: q('US'), crypto: q('CRYPTO'), fng, news, calendar: cal, alerts: D.alerts, cfg: { showLevel: 2, pushLevel: 4, gemini: true, discord: true, newsEvery: 5 } }));
+    else if (action === 'quotes') res(Object.assign(base, { futures: fut, tw: q('TW'), us: q('US'), crypto: q('CRYPTO') }));
+    else if (action === 'news') res({ ok: true, news, newsVer: 1 });
+    else if (action === 'fng') res({ ok: true, fng });
+    else if (action === 'cal') res({ ok: true, calendar: cal });
+    else if (action === 'watch_add') { const it = { market: p.market, symbol: String(p.symbol).toUpperCase(), name: p.name || String(p.symbol).toUpperCase() }; D.watch.push(it); D.base[it.symbol] = [100, 1]; res({ ok: true, item: it, watch: D.watch }); }
+    else if (action === 'watch_del') { D.watch = D.watch.filter(w => !(w.market === p.market && w.symbol === p.symbol)); res({ ok: true, watch: D.watch }); }
+    else if (action === 'watch_move') res({ ok: true, watch: D.watch });
+    else if (action === 'alert_add') { D.alerts.push({ id: 'd' + now, enabled: true, market: p.market, symbol: p.symbol, name: (D.watch.find(w => w.symbol === p.symbol) || {}).name || p.symbol, cond: p.cond, value: Number(p.value), note: p.note, state: '' }); res({ ok: true, alerts: D.alerts }); }
+    else if (action === 'alert_del') { D.alerts = D.alerts.filter(a => a.id !== p.id); res({ ok: true, alerts: D.alerts }); }
+    else if (action === 'alert_toggle') { const a = D.alerts.find(x => x.id === p.id); if (a) a.enabled = !a.enabled; res({ ok: true, alerts: D.alerts }); }
+    else res({ ok: true });
+  }, 150));
+}
+
+if (DEMO) { if (new URLSearchParams(location.search).has('demo')) LS.set('demo', true); start(); }
+else if (S.url) start();
+else showSetup();
+</script>
+</body>
+</html>
