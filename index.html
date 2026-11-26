@@ -848,7 +848,7 @@ document.addEventListener('click', async e => {
   if (t.id === 'btnSound') { S.sound = !S.sound; LS.set('sound', S.sound); renderSoundBtn(); if (S.sound) beep('news'); return; }
   if (t.id === 'btnSet') {
     $('#setInfo').innerHTML = DEMO ? '目前是範例模式（假資料）' :
-      `AI 判讀：${S.cfg.gemini ? '✅ 已啟用 Gemini' : '⚠️ 未設定（使用 Google 翻譯＋關鍵字）'}<br>Discord 推播：${S.cfg.discord ? '✅ 已設定' : '⚠️ 未設定'}<br>推播門檻：重要度 ≥ ${S.cfg.pushLevel}<br>瀏覽器通知：${'Notification' in window ? ({ granted: '✅ 已允許', denied: '❌ 已封鎖', default: '未設定' }[Notification.permission]) : '此瀏覽器不支援'}`;
+      `AI 判讀：${S.cfg.gemini ? `✅ 已啟用 Gemini（今日已用 ${S.cfg.aiUsed ?? '?'}／${S.cfg.aiMax ?? '?'} 次${S.cfg.aiOk ? '，上次成功 ' + hhmm(S.cfg.aiOk) : ''}）` : '⚠️ 未設定（使用 Google 翻譯＋關鍵字）'}${S.cfg.aiErr ? '<br><span style="color:var(--up)">AI 上次錯誤：' + esc(S.cfg.aiErr) + '</span>' : ''}<br>Discord 推播：${S.cfg.discord ? '✅ 已設定' : '⚠️ 未設定'}<br>推播門檻：重要度 ≥ ${S.cfg.pushLevel}<br>瀏覽器通知：${'Notification' in window ? ({ granted: '✅ 已允許', denied: '❌ 已封鎖', default: '未設定' }[Notification.permission]) : '此瀏覽器不支援'}`;
     $('#sErr').textContent = ''; openM('mSet'); return;
   }
   if (t.id === 'sNotify') {
