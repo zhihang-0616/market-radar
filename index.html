@@ -121,6 +121,44 @@ main{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) minmax(0,
 .empty{color:var(--dim);font-size:13px;text-align:center;padding:24px 0;line-height:1.8}
 .more{width:100%;padding:8px;border:1px solid var(--line2);border-radius:8px;color:var(--muted);font-size:12px;margin-top:8px}
 
+/* AI brief */
+.bias{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:6px;margin-right:6px;vertical-align:1px}
+.bias.up{background:var(--up-bg)} .bias.down{background:var(--down-bg)} .bias.flat{background:rgba(138,150,168,.14)}
+.bh{font-size:15px;font-weight:700;line-height:1.55;margin-bottom:10px}
+.bp{padding:9px 0;border-top:1px solid var(--line)}
+.bp .t{font-size:13.5px;font-weight:700;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.bp .d{font-size:12.5px;color:#B9C2CF;line-height:1.6;margin-top:3px}
+.bw{margin-top:10px;padding:10px;border-radius:9px;background:var(--panel2);border:1px solid var(--line);font-size:12.5px;line-height:1.7}
+.bw b{color:var(--accent2);font-size:12px}
+/* Holdings */
+.hsum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.hsum div{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:8px 10px}
+.hsum small{display:block;font-size:11px;color:var(--muted)}
+.hsum b{font-family:var(--mono);font-size:14px}
+.hr{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:9px 4px;border-top:1px solid var(--line);cursor:pointer;border-radius:6px}
+.hr:hover{background:var(--panel2)}
+.hr .hn{font-weight:700;font-size:13px}
+.hr .hn small{font-weight:400;color:var(--dim);font-family:var(--mono);margin-left:5px;font-size:11px}
+.hr .m{font-size:11.5px;color:var(--muted);font-family:var(--mono)}
+.hr .r{text-align:right;font-family:var(--mono);font-size:13px;font-weight:700}
+.hr .r2{text-align:right;font-family:var(--mono);font-size:11.5px}
+.hr .flag{font-size:10px;padding:0 5px;border-radius:4px;background:rgba(245,185,66,.15);color:var(--amber);margin-left:4px;font-family:var(--sans)}
+/* Chips & leverage */
+.kv{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kv div{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:8px 10px}
+.kv small{display:block;font-size:11px;color:var(--muted)}
+.kv b{font-family:var(--mono);font-size:14.5px}
+.kh{font-size:12px;color:var(--accent2);font-weight:700;margin:12px 0 6px}
+.kh:first-child{margin-top:0}
+.lv{display:grid;grid-template-columns:52px 1fr 1fr;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:12.5px}
+.lv:first-of-type{border-top:0}
+.lv .s{font-weight:700;font-family:var(--mono)}
+.lv .v{font-family:var(--mono);font-weight:700}
+.lv small{display:block;font-size:11px}
+.hint{font-size:11.5px;color:var(--dim);line-height:1.65;margin-top:8px}
+.q .tip{font-size:10.5px;color:var(--dim);margin-top:4px;line-height:1.45}
+.col3{display:flex;flex-direction:column;gap:14px;min-width:0}
+
 /* Calendar */
 .cday{font-size:12px;font-weight:700;color:var(--accent2);margin:12px 0 6px;display:flex;gap:6px;align-items:center}
 .cday:first-child{margin-top:0}
@@ -185,7 +223,7 @@ main{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) minmax(0,
 .tabbar{display:none}
 @media (max-width:1180px){
   main{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)}
-  #colCal{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .col3{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
 }
 @media (max-width:760px){
   html,body{font-size:14px}
@@ -195,7 +233,8 @@ main{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) minmax(0,
   main{display:block;padding:10px 10px calc(76px + env(safe-area-inset-bottom))}
   .col{display:none}
   .col.active{display:flex}
-  #colCal.active{display:flex}
+  .col3{display:block}
+  .hsum,.kv{grid-template-columns:1fr 1fr 1fr}
   .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .fng{grid-template-columns:1fr}
   .gauge{width:74px}
@@ -255,6 +294,10 @@ main{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) minmax(0,
       <div class="grid" id="gUS"></div>
     </div>
     <div class="panel">
+      <div class="ph"><h2>總經指標</h2><span class="sub">資金流向與風險溫度</span></div>
+      <div class="grid" id="gMacro"></div>
+    </div>
+    <div class="panel">
       <div class="ph"><h2>加密貨幣</h2><span class="sub" id="cxSub">24 小時漲跌</span><div class="tools"><button class="tbtn" data-edit="CRYPTO">編輯</button></div></div>
       <div class="grid" id="gCRYPTO"></div>
     </div>
@@ -268,6 +311,25 @@ main{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) minmax(0,
     </div>
   </div>
 
+  <div class="col3">
+  <div class="col" id="colPro" data-tab="pro">
+    <div class="panel" id="pBrief">
+      <div class="ph"><h2>🤖 AI 今日重點</h2><span class="sub" id="briefSub"></span><div class="tools"><button class="tbtn" id="briefBtn">更新</button></div></div>
+      <div id="briefBody"></div>
+    </div>
+    <div class="panel" id="pHold">
+      <div class="ph"><h2>我的持倉</h2><span class="sub">停損／停利會推播</span><div class="tools"><button class="tbtn" id="holdAdd">＋ 新增</button></div></div>
+      <div id="holdBody"></div>
+    </div>
+    <div class="panel" id="pChips">
+      <div class="ph"><h2>三大法人籌碼</h2><span class="sub">證交所・期交所</span></div>
+      <div id="chipsBody"></div>
+    </div>
+    <div class="panel" id="pLev">
+      <div class="ph"><h2>加密槓桿指標</h2><span class="sub">永續合約</span></div>
+      <div id="levBody"></div>
+    </div>
+  </div>
   <div class="col" id="colCal" data-tab="cal">
     <div class="panel" id="pCal">
       <div class="ph"><h2>7 天行事曆</h2><span class="sub">台北時間</span><div class="tools"><button class="tbtn" id="calHigh">只看重要</button></div></div>
@@ -279,12 +341,14 @@ main{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) minmax(0,
       <div id="evList" style="margin-top:10px"></div>
     </div>
   </div>
+  </div>
 </main>
 
 <nav class="tabbar" id="tabbar">
   <button data-go="mk" class="on"><span>📈</span>行情</button>
   <button data-go="news"><span>📰</span>新聞<i class="badge" id="newsBadge"></i></button>
-  <button data-go="cal"><span>📅</span>行事曆・警報</button>
+  <button data-go="pro"><span>🤖</span>重點・持倉</button>
+  <button data-go="cal"><span>📅</span>行事曆</button>
 </nav>
 </div>
 
@@ -313,6 +377,27 @@ main{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) minmax(0,
   <div class="field"><div class="hint">漲跌幅：台股、美股以「昨收」計算；加密貨幣以「24 小時」計算。觸發一次後，要等條件解除再成立才會再通知。</div></div>
   <div class="err" id="alErr"></div>
   <div class="mbtns"><button class="btn" data-close>取消</button><button class="btn pri" id="alGo">新增</button></div>
+</div></div>
+
+<!-- 持倉 -->
+<div class="mask" id="mHold"><div class="modal">
+  <h3 id="hTitle">新增持倉</h3>
+  <div class="row2">
+    <div class="field"><label>市場</label><select id="hMk"><option value="TW">台股（台幣）</option><option value="US">美股（美元）</option><option value="CRYPTO">加密（美元）</option></select></div>
+    <div class="field"><label>代號</label><input id="hSym" autocomplete="off" placeholder="2330 / NVDA / BTC"></div>
+  </div>
+  <div class="row2">
+    <div class="field"><label>數量（股／顆）</label><input id="hQty" type="number" step="any" inputmode="decimal"></div>
+    <div class="field"><label>平均成本價</label><input id="hCost" type="number" step="any" inputmode="decimal"></div>
+  </div>
+  <div class="row2">
+    <div class="field"><label>停損 %（虧損達到就通知）</label><input id="hStop" type="number" step="any" inputmode="decimal" placeholder="例如 8"></div>
+    <div class="field"><label>停利 %（獲利達到就通知）</label><input id="hTake" type="number" step="any" inputmode="decimal" placeholder="例如 20"></div>
+  </div>
+  <div class="field"><label>備註（可空白）</label><input id="hNote"></div>
+  <div class="field"><div class="hint">台股一張 = 1000 股，請填股數。停損停利留空就不通知。</div></div>
+  <div class="err" id="hErr"></div>
+  <div class="mbtns"><button class="btn" id="hDel" style="display:none;color:var(--up)">刪除</button><button class="btn" data-close>取消</button><button class="btn pri" id="hGo">儲存</button></div>
 </div></div>
 
 <!-- 設定 -->
@@ -347,6 +432,7 @@ const S = {
   url: LS.get('url', ''), key: LS.get('key', ''),
   watch: [], fut: { list: [], session: '' }, tw: {}, us: {}, crypto: {}, spark: {},
   fng: null, news: [], cal: [], alerts: [], events: [], cfg: { showLevel: 2, pushLevel: 4 },
+  macro: [], holdings: [], chips: null, brief: null, lev: {}, holdEdit: null,
   newsVer: 0, since: Date.now(), seen: new Set(LS.get('seen', [])), freshIds: new Set(),
   f: Object.assign({ mk: 'all', imp: 'all', lv: null }, LS.get('filters', {})),
   sound: LS.get('sound', true), editing: {}, calHigh: LS.get('calHigh', false),
@@ -506,6 +592,150 @@ function updateCard(m, sym) {
   const ce = el.querySelector('[data-c]');
   ce.className = 'q-chg ' + c;
   ce.innerHTML = `${arrow(q.chg)} ${fmt(Math.abs(q.chg || 0), d)}　${q.pct != null ? (q.pct > 0 ? '+' : '') + q.pct.toFixed(2) + '%' : ''}`;
+}
+
+/* ---------- 總經 ---------- */
+const MACRO_TIP = {
+  'TWD=X': '數字下降＝台幣升值，通常代表外資匯入，對台股偏多',
+  'DX-Y.NYB': '美元走強時，資金回流美國，對新興市場與加密貨幣偏空',
+  '^TNX': '殖利率上升會壓抑科技股與成長股評價',
+  '^VIX': '20 以下平穩；超過 20 市場緊張、超過 30 恐慌',
+  'GC=F': '避險需求升高時黃金上漲',
+  'CL=F': '油價上漲會推升通膨壓力，不利降息',
+};
+function renderMacro() {
+  $('#gMacro').innerHTML = S.macro.map(m => {
+    const c = cls(m.chg);
+    return `<div class="q"><div class="q-top"><span class="q-name">${esc(m.name)}</span></div>
+      <div class="q-price num ${c}">${fmt(m.price, m.dec)}</div>
+      <div class="q-chg ${c}">${m.price == null ? '<span class="flat">資料讀取中</span>' : `${arrow(m.chg)} ${fmt(Math.abs(m.chg || 0), m.dec)}　${m.pct != null ? (m.pct > 0 ? '+' : '') + m.pct.toFixed(2) + '%' : ''}`}</div>
+      <div class="tip">${esc(MACRO_TIP[m.symbol] || '')}</div></div>`;
+  }).join('') || '<div class="empty">讀取中…</div>';
+}
+
+/* ---------- AI 今日重點 ---------- */
+function biasCls(b) { return /多/.test(b) ? 'up' : /空/.test(b) ? 'down' : 'flat'; }
+function renderBrief() {
+  const b = S.brief;
+  $('#briefSub').textContent = b ? hhmm(b.ts) + ' 產生・每天 8 點自動更新' : '';
+  if (!b) { $('#briefBody').innerHTML = `<div class="empty">還沒有今日重點。<br>按右上角「更新」，AI 會整理盤勢、籌碼、新聞和行事曆。</div>`; return; }
+  const tagc = { '利多': 'bull', '利空': 'bear', '中性': 'neu' };
+  $('#briefBody').innerHTML = `<div class="bh"><span class="bias ${biasCls(b.bias)}">${esc(b.bias)}</span>${esc(b.headline)}</div>` +
+    b.points.map(x => `<div class="bp"><div class="t"><span class="tag ${tagc[x.impact] || 'neu'}">${esc(x.impact)}</span>${x.market ? `<span class="mk">${esc(x.market)}</span>` : ''}${esc(x.title)}</div><div class="d">${esc(x.detail)}</div></div>`).join('') +
+    (b.watch && b.watch.length ? `<div class="bw"><b>👀 今天要盯</b><br>${b.watch.map(w => '• ' + esc(w)).join('<br>')}</div>` : '') +
+    (b.holding ? `<div class="bw"><b>💼 持倉提醒</b><br>${esc(b.holding)}</div>` : '') +
+    `<div class="hint">AI 根據即時資料整理，僅供參考，不是買賣建議。</div>`;
+}
+
+/* ---------- 持倉 ---------- */
+function usdTwd() { const m = S.macro.find(x => x.symbol === 'TWD=X'); return m && m.price ? m.price : null; }
+function holdCalc(h) {
+  const q = qData(h.market, h.symbol) || {};
+  const fx = h.market === 'TW' ? 1 : usdTwd();
+  const price = q.price != null ? q.price : null;
+  const r = { price, cur: h.market === 'TW' ? 'NT$' : 'US$', pct: price != null ? (price - h.cost) / h.cost * 100 : null };
+  r.mv = price != null ? price * h.qty : null;
+  r.pl = price != null ? (price - h.cost) * h.qty : null;
+  r.day = q.chg != null ? q.chg * h.qty : null;
+  r.mvT = r.mv != null && fx ? r.mv * fx : null;
+  r.plT = r.pl != null && fx ? r.pl * fx : null;
+  r.dayT = r.day != null && fx ? r.day * fx : null;
+  r.costT = fx ? h.cost * h.qty * fx : null;
+  return r;
+}
+const money = (v, d) => v == null ? '—' : (v < 0 ? '-' : '') + fmt(Math.abs(v), d == null ? 0 : d);
+const sgn = (v, d) => v == null ? '—' : (v > 0 ? '+' : v < 0 ? '-' : '') + fmt(Math.abs(v), d == null ? 0 : d);
+function renderHold() {
+  const H = S.holdings;
+  if (!H.length) { $('#holdBody').innerHTML = '<div class="empty">還沒有持倉。<br>按「＋ 新增」輸入持有的標的、數量、成本，就能看到即時損益。</div>'; return; }
+  let mv = 0, pl = 0, cost = 0, day = 0, ok = true;
+  const rows = H.map(h => {
+    const c = holdCalc(h);
+    if (c.mvT == null) ok = false; else { mv += c.mvT; pl += c.plT; cost += c.costT; day += c.dayT || 0; }
+    const pc = cls(c.pct);
+    const dec = h.market === 'CRYPTO' ? undefined : 2;
+    const stopTxt = [h.stop ? '停損 -' + h.stop + '%' : '', h.take ? '停利 +' + h.take + '%' : ''].filter(Boolean).join('・');
+    return `<div class="hr" data-hold="${esc(h.id)}">
+      <div class="hn">${esc(h.name)}<small>${esc(h.symbol === 't00' ? 'TAIEX' : h.symbol)}</small>${h.state ? `<span class="flag">已達${esc(h.state)}</span>` : ''}</div>
+      <div class="r ${pc}">${c.pct == null ? '—' : (c.pct > 0 ? '+' : '') + c.pct.toFixed(2) + '%'}</div>
+      <div class="m">${fmt(h.qty, h.qty % 1 ? undefined : 0)} @ ${fmt(h.cost, dec)} → ${fmt(c.price, dec)}${stopTxt ? '　' + stopTxt : ''}</div>
+      <div class="r2 ${pc}">${c.cur} ${sgn(c.pl, h.market === 'TW' ? 0 : 2)}</div>
+    </div>`;
+  }).join('');
+  const tc = cls(pl);
+  $('#holdBody').innerHTML = `<div class="hsum">
+      <div><small>總市值（台幣）</small><b>${ok || mv ? money(mv) : '—'}</b></div>
+      <div><small>未實現損益</small><b class="${tc}">${sgn(pl)}</b><small class="${tc}">${cost ? (pl > 0 ? '+' : '') + (pl / cost * 100).toFixed(2) + '%' : ''}</small></div>
+      <div><small>今日損益</small><b class="${cls(day)}">${sgn(day)}</b></div>
+    </div>${rows}<div class="hint">美股與加密以即時匯率 ${usdTwd() ? fmt(usdTwd(), 3) : '—'} 換算台幣。點一下持倉可以編輯。</div>`;
+}
+function openHold(id) {
+  const h = id ? S.holdings.find(x => x.id === id) : null;
+  S.holdEdit = h ? h.id : null;
+  $('#hTitle').textContent = h ? '編輯持倉' : '新增持倉';
+  $('#hMk').value = h ? h.market : 'TW'; $('#hSym').value = h ? h.symbol : '';
+  $('#hQty').value = h ? h.qty : ''; $('#hCost').value = h ? h.cost : '';
+  $('#hStop').value = h && h.stop ? h.stop : ''; $('#hTake').value = h && h.take ? h.take : ''; $('#hNote').value = h ? h.note : '';
+  $('#hDel').style.display = h ? '' : 'none'; $('#hErr').textContent = '';
+  openM('mHold');
+}
+
+/* ---------- 籌碼 ---------- */
+function renderChips() {
+  const c = S.chips;
+  if (!c || (!c.spot && !c.fut)) { $('#chipsBody').innerHTML = '<div class="empty">讀取中，或資料尚未公布（現貨約 15:00、期貨約 15:30 公布）</div>'; return; }
+  const yi = v => v == null ? '—' : sgn(v / 1e8, 1) + ' 億';
+  let h = '';
+  if (c.spot) h += `<div class="kh">現貨買賣超（${esc(c.spot.date)}）</div><div class="kv">
+    <div><small>外資</small><b class="${cls(c.spot.foreign)}">${yi(c.spot.foreign)}</b></div>
+    <div><small>投信</small><b class="${cls(c.spot.trust)}">${yi(c.spot.trust)}</b></div>
+    <div><small>自營商</small><b class="${cls(c.spot.dealer)}">${yi(c.spot.dealer)}</b></div></div>`;
+  if (c.fut) {
+    const f = c.fut.foreign;
+    const read = f <= -30000 ? '外資期貨空單很重，偏空或大量避險' : f <= -10000 ? '外資期貨偏空' : f < 10000 ? '外資期貨部位中性' : '外資期貨偏多';
+    h += `<div class="kh">台指期淨未平倉（${esc(c.fut.date)}）</div><div class="kv">
+      <div><small>外資</small><b class="${cls(f)}">${sgn(f)} 口</b>${c.fut.chg != null ? `<small class="${cls(c.fut.chg)}">較前日 ${sgn(c.fut.chg)}</small>` : ''}</div>
+      <div><small>投信</small><b class="${cls(c.fut.trust)}">${sgn(c.fut.trust)} 口</b></div>
+      <div><small>自營商</small><b class="${cls(c.fut.dealer)}">${sgn(c.fut.dealer)} 口</b></div></div>
+      <div class="hint">📌 ${read}。淨未平倉＝多單減空單，負數代表空單較多（外資也常用空單避險現貨）。</div>`;
+  }
+  $('#chipsBody').innerHTML = h;
+}
+
+/* ---------- 加密槓桿（瀏覽器直接向交易所查詢）---------- */
+async function getJson(u) { const r = await fetch(u); if (!r.ok) throw new Error(r.status); return r.json(); }
+async function loadLev() {
+  const syms = S.watch.filter(w => w.market === 'CRYPTO').slice(0, 5).map(w => w.symbol);
+  if (DEMO) { S.lev = { BTC: { fr: 0.0001, ls: 1.62 }, ETH: { fr: 0.00032, ls: 2.31 }, SOL: { fr: -0.00015, ls: 0.86 }, BNB: { fr: 0.00005, ls: 1.4 }, XRP: { fr: 0.0001, ls: 2.05 } }; renderLev(); return; }
+  await Promise.all(syms.map(async b => {
+    const sym = b + 'USDT';
+    try {
+      const [pi, ls] = await Promise.all([getJson('https://fapi.binance.com/fapi/v1/premiumIndex?symbol=' + sym), getJson('https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol=' + sym + '&period=1h&limit=1')]);
+      S.lev[b] = { fr: +pi.lastFundingRate, ls: ls && ls[0] ? +ls[0].longShortRatio : null };
+    } catch (e) {
+      try {
+        const [tk, ar] = await Promise.all([getJson('https://api.bybit.com/v5/market/tickers?category=linear&symbol=' + sym), getJson('https://api.bybit.com/v5/market/account-ratio?category=linear&symbol=' + sym + '&period=1h&limit=1')]);
+        const t = tk.result.list[0], a = ar.result.list[0];
+        S.lev[b] = { fr: +t.fundingRate, ls: a ? +a.buyRatio / +a.sellRatio : null };
+      } catch (e2) { S.lev[b] = S.lev[b] || null; }
+    }
+  }));
+  renderLev();
+}
+function renderLev() {
+  const syms = S.watch.filter(w => w.market === 'CRYPTO').slice(0, 5).map(w => w.symbol);
+  const rows = syms.map(b => {
+    const v = S.lev[b];
+    if (!v) return `<div class="lv"><span class="s">${esc(b)}</span><span class="flat">取不到</span><span></span></div>`;
+    const fr = v.fr * 100;
+    const fl = fr >= 0.05 ? ['多方過熱', 'up'] : fr >= 0.01 ? ['偏多（正常）', 'up'] : fr > -0.01 ? ['中性', 'flat'] : ['空方擁擠', 'down'];
+    const ll = v.ls == null ? ['—', 'flat'] : v.ls >= 2 ? ['散戶大量做多 ⚠️', 'up'] : v.ls >= 1.2 ? ['偏多', 'up'] : v.ls >= 0.8 ? ['均衡', 'flat'] : ['散戶偏空', 'down'];
+    return `<div class="lv"><span class="s">${esc(b)}</span>
+      <div><span class="v ${fl[1]}">${fr >= 0 ? '+' : ''}${fr.toFixed(4)}%</span><small class="${fl[1]}">資金費率・${fl[0]}</small></div>
+      <div><span class="v ${ll[1]}">${v.ls == null ? '—' : v.ls.toFixed(2)}</span><small class="${ll[1]}">多空人數比・${ll[0]}</small></div></div>`;
+  }).join('');
+  $('#levBody').innerHTML = (rows || '<div class="empty">先在加密貨幣區加入幣種</div>') +
+    '<div class="hint">資金費率：正數代表做多的人付費給做空的人，越高代表多方越擁擠，容易出現急跌洗盤；負數則容易軋空急漲。<br>多空人數比：大於 2 代表散戶一面倒做多，常被視為反向警訊。</div>';
 }
 
 /* ---------- 恐懼貪婪 ---------- */
@@ -702,7 +932,7 @@ function connectWs() {
   ws.onerror = () => { try { ws.close(); } catch (e) {} };
 }
 const cq = new Set(); let cqT = null;
-function queueCrypto(b) { cq.add(b); if (!cqT) cqT = setTimeout(() => { cq.forEach(x => updateCard('CRYPTO', x)); cq.clear(); cqT = null; }, 500); }
+function queueCrypto(b) { cq.add(b); if (!cqT) cqT = setTimeout(() => { cq.forEach(x => updateCard('CRYPTO', x)); cq.clear(); cqT = null; if (S.holdings.some(h => h.market === 'CRYPTO')) renderHold(); }, 1000); }
 async function loadCryptoSpark() {
   if (DEMO) return;
   const list = S.watch.filter(w => w.market === 'CRYPTO');
@@ -722,6 +952,7 @@ function applyQuotes(j) {
   if (j.futures) S.fut = j.futures;
   if (j.tw) S.tw = j.tw;
   if (j.us) S.us = j.us;
+  if (j.macro) S.macro = j.macro;
   if (j.crypto) Object.entries(j.crypto).forEach(([k, v]) => { if (v && (!S.wsOk || !S.crypto[k])) S.crypto[k] = Object.assign(S.crypto[k] || {}, v); });
 }
 function handleEvents(evs) {
@@ -744,10 +975,11 @@ async function loadAll() {
   S.watch = j.watch || [];
   applyQuotes(j);
   S.fng = j.fng; S.cal = j.calendar || []; S.alerts = j.alerts || []; S.cfg = Object.assign(S.cfg, j.cfg || {});
+  S.holdings = j.holdings || []; S.chips = j.chips || null; S.brief = j.brief || null;
   S.events = (j.events || []).slice(0, 30);
   S.since = j.time || Date.now();
   S.newsVer = j.newsVer;
-  renderMarkets(); renderFng(); renderCal(); renderAlerts(); renderPills();
+  renderMarkets(); renderFng(); renderCal(); renderAlerts(); renderPills(); renderMacro(); renderBrief(); renderHold(); renderChips(); renderLev(); loadLev();
   ingestNews(j.news || [], false);
   S.firstLoad = false;
   setSync(true, '已更新 ' + hhmm(Date.now()));
@@ -758,11 +990,10 @@ let polling = false, fails = 0;
 async function poll() {
   if (polling) return; polling = true;
   try {
-    const parts = ['fut', 'tw', 'us'];
-    if (!S.wsOk) parts.push('crypto');
+    const parts = ['fut', 'tw', 'us', 'crypto', 'macro'];
     const j = await api('quotes', { parts: parts.join(','), since: S.since });
     applyQuotes(j);
-    renderMarkets(); renderPills(); renderAlerts();
+    renderMarkets(); renderPills(); renderAlerts(); renderMacro(); renderHold();
     handleEvents(j.events);
     if (j.newsVer && j.newsVer !== S.newsVer) {
       S.newsVer = j.newsVer;
@@ -781,6 +1012,8 @@ async function slowRefresh(kind) {
   try {
     if (kind === 'fng') { const j = await api('fng'); S.fng = j.fng; renderFng(); }
     if (kind === 'cal') { const j = await api('cal'); S.cal = j.calendar || []; renderCal(); }
+    if (kind === 'chips') { const j = await api('chips'); S.chips = j.chips; renderChips(); }
+    if (kind === 'brief') { const j = await api('brief'); if (j.brief) { S.brief = j.brief; renderBrief(); } }
   } catch (e) {}
 }
 
@@ -810,6 +1043,8 @@ function showNow() {
 
 document.addEventListener('click', async e => {
   unlockAudio();
+  const hr = e.target.closest('[data-hold]');
+  if (hr) { openHold(hr.dataset.hold); return; }
   const t = e.target.closest('button,[data-close]');
   if (e.target.classList.contains('mask')) { closeM(); return; }
   if (!t) return;
@@ -828,6 +1063,28 @@ document.addEventListener('click', async e => {
   if (t.id === 'nMore') { S.newsLimit += 40; renderNews(); return; }
   if (t.id === 'calHigh') { S.calHigh = !S.calHigh; LS.set('calHigh', S.calHigh); renderCal(); return; }
   if (t.id === 'alAdd') { openAlert(); return; }
+  if (t.id === 'holdAdd') { openHold(); return; }
+  if (t.id === 'briefBtn') {
+    t.disabled = true; t.textContent = 'AI 分析中…';
+    try { const j = await api('brief_new'); S.brief = j.brief; renderBrief(); } catch (err) { toast('AI 重點產生失敗', err.message, 'alert'); }
+    finally { t.disabled = false; t.textContent = '更新'; }
+    return;
+  }
+  if (t.id === 'hGo') {
+    const qty = $('#hQty').value, cost = $('#hCost').value;
+    if (!$('#hSym').value.trim() || !qty || !cost) { $('#hErr').textContent = '請填代號、數量、成本價'; return; }
+    t.disabled = true; $('#hErr').textContent = '儲存中…';
+    try {
+      const j = await api('hold_save', { id: S.holdEdit || '', market: $('#hMk').value, symbol: $('#hSym').value.trim(), qty, cost, stop: $('#hStop').value, take: $('#hTake').value, note: $('#hNote').value.trim() });
+      S.holdings = j.holdings; closeM(); await poll(); renderHold();
+    } catch (err) { $('#hErr').textContent = err.message; } finally { t.disabled = false; }
+    return;
+  }
+  if (t.id === 'hDel') {
+    if (!confirm('確定刪除這筆持倉？')) return;
+    try { const j = await api('hold_del', { id: S.holdEdit }); S.holdings = j.holdings; closeM(); renderHold(); } catch (err) { $('#hErr').textContent = err.message; }
+    return;
+  }
   if (t.hasAttribute('data-al')) { openAlert(t.dataset.m, t.dataset.s); return; }
   if (t.dataset.mv) {
     try { const j = await api('watch_move', { market: t.dataset.m, symbol: t.dataset.s, dir: t.dataset.mv }); S.watch = j.watch; renderMarkets(); } catch (err) { toast('錯誤', err.message, 'alert'); }
@@ -914,6 +1171,9 @@ async function start() {
     setInterval(() => slowRefresh('cal'), 60 * 60000),
     setInterval(() => { renderPills(); renderCal(); if (S.news.length) $('#newsSub').textContent = `更新 ${ago(Math.max(...S.news.map(n => n.ts)))}・約每 ${S.cfg.newsEvery || 5} 分鐘抓一次`; }, 60000),
     setInterval(loadCryptoSpark, 10 * 60000),
+    setInterval(() => slowRefresh('chips'), 30 * 60000),
+    setInterval(() => slowRefresh('brief'), 20 * 60000),
+    setInterval(loadLev, 5 * 60000),
   ];
   document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(); });
 }
@@ -971,12 +1231,26 @@ function demoApi(action, p) {
     { type: 'eco', ts: now + 5 * day, countryZh: '美國', impact: 'High', zh: '失業率', forecast: '4.4%', previous: '4.4%', why: '失業率上升代表經濟降溫，提高降息機率，但太高會引發衰退擔憂。' },
   ];
   const fng = { stock: Object.assign({ value: 38, prev: 33, week: 22, label: '恐懼', bias: '偏空', tip: '投資人偏保守，資金觀望。行情較弱，等待利多消息或止跌訊號。' }), crypto: { value: 21, prev: 25, week: 15, label: '極度恐懼', bias: '短線偏空', tip: '市場非常悲觀、恐慌賣壓大。短線容易續跌，但歷史上也常是逆向布局的時機，宜分批、控制部位。' } };
-  const base = { ok: true, time: now, newsVer: 1, events: [] };
+  const mac = [['TWD=X', '美元/台幣', 3, 31.62, -0.18], ['DX-Y.NYB', '美元指數', 2, 99.84, 0.12], ['^TNX', '美債10年殖利率', 3, 4.112, -0.6], ['^VIX', 'VIX 恐慌指數', 2, 28.3, 4.2], ['GC=F', '黃金', 1, 4120.5, 0.8], ['CL=F', '原油', 2, 58.9, -1.3]]
+    .map(m => Object.assign({ symbol: m[0], name: m[1], dec: m[2] }, mk(m[3], m[4])));
+  const hold = [{ id: 'h1', market: 'TW', symbol: '2330', name: '台積電', qty: 2000, cost: 1180, stop: 10, take: 30, note: '', state: '' }, { id: 'h2', market: 'US', symbol: 'NVDA', name: '輝達', qty: 50, cost: 165, stop: 8, take: 0, note: '', state: '' }, { id: 'h3', market: 'CRYPTO', symbol: 'BTC', name: '比特幣', qty: 0.15, cost: 98000, stop: 15, take: 0, note: '', state: '' }];
+  D.hold = D.hold || hold;
+  const chips = { spot: { date: '11/26', foreign: 21.35e9, trust: -1.2e9, dealer: 3.4e9 }, fut: { date: '11/26', foreign: -28450, chg: 3120, trust: 15320, dealer: -2100 } };
+  const brief = { ts: now - 40 * 60000, bias: '震盪偏多', headline: '台股強彈但外資期貨空單仍重，美股假期量縮，留意週五 PCE', points: [
+    { title: '台股大漲 2.5%', detail: '外資回補現貨 213 億，PCB 與 AI 族群領漲，但外資台指期淨空單仍有 2.8 萬口，反彈延續性需觀察。', impact: '利多', market: '台股' },
+    { title: '降息預期升溫', detail: '聯準會官員釋出 12 月降息訊號，美債殖利率回落至 4.1%，有利成長股評價。', impact: '利多', market: '全市場' },
+    { title: '比特幣 ETF 資金流出', detail: '連三日淨流出，加密恐懼貪婪指數 11 處極度恐懼，短線賣壓仍在。', impact: '利空', market: '加密' }],
+    watch: ['今晚美股感恩節休市', '週五 21:30 核心 PCE 物價', '外資期貨空單是否持續回補'], holding: '比特幣目前虧損約 38%，已超過你設定的 15% 停損，請留意。' };
+  const base = { ok: true, time: now, newsVer: 1, events: [], macro: mac };
   return new Promise(res => setTimeout(() => {
-    if (action === 'all') res(Object.assign(base, { watch: D.watch, futures: fut, tw: q('TW'), us: q('US'), crypto: q('CRYPTO'), fng, news, calendar: cal, alerts: D.alerts, cfg: { showLevel: 2, pushLevel: 4, gemini: true, discord: true, newsEvery: 5 } }));
+    if (action === 'all') res(Object.assign(base, { holdings: D.hold, chips, brief, watch: D.watch, futures: fut, tw: q('TW'), us: q('US'), crypto: q('CRYPTO'), fng, news, calendar: cal, alerts: D.alerts, cfg: { showLevel: 2, pushLevel: 4, gemini: true, discord: true, newsEvery: 5 } }));
     else if (action === 'quotes') res(Object.assign(base, { futures: fut, tw: q('TW'), us: q('US'), crypto: q('CRYPTO') }));
     else if (action === 'news') res({ ok: true, news, newsVer: 1 });
     else if (action === 'fng') res({ ok: true, fng });
+    else if (action === 'chips') res({ ok: true, chips });
+    else if (action === 'brief' || action === 'brief_new') res({ ok: true, brief: Object.assign({}, brief, { ts: action === 'brief_new' ? now : brief.ts }) });
+    else if (action === 'hold_save') { const h = { id: p.id || 'h' + now, market: p.market, symbol: String(p.symbol).toUpperCase(), name: (D.watch.find(w => w.symbol === String(p.symbol).toUpperCase()) || {}).name || String(p.symbol).toUpperCase(), qty: +p.qty, cost: +p.cost, stop: +p.stop || 0, take: +p.take || 0, note: p.note, state: '' }; D.hold = D.hold.filter(x => x.id !== h.id).concat(h); res({ ok: true, holdings: D.hold }); }
+    else if (action === 'hold_del') { D.hold = D.hold.filter(x => x.id !== p.id); res({ ok: true, holdings: D.hold }); }
     else if (action === 'cal') res({ ok: true, calendar: cal });
     else if (action === 'watch_add') { const it = { market: p.market, symbol: String(p.symbol).toUpperCase(), name: p.name || String(p.symbol).toUpperCase() }; D.watch.push(it); D.base[it.symbol] = [100, 1]; res({ ok: true, item: it, watch: D.watch }); }
     else if (action === 'watch_del') { D.watch = D.watch.filter(w => !(w.market === p.market && w.symbol === p.symbol)); res({ ok: true, watch: D.watch }); }
